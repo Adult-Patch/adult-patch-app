@@ -3,6 +3,8 @@ const STORAGE_KEY = "adult-patch:app-state";
 const DEFAULT_APP_STATE = {
   onboardingCompleted: false,
   selectedSituation: "",
+  selectedInterests: [],
+  experienceLevel: "",
   completedPatchIds: [],
   completedMissionIds: [],
   patchSelections: {},
@@ -11,6 +13,7 @@ const DEFAULT_APP_STATE = {
 function createDefaultAppState() {
   return {
     ...DEFAULT_APP_STATE,
+    selectedInterests: [],
     completedPatchIds: [],
     completedMissionIds: [],
     patchSelections: {},
@@ -48,12 +51,15 @@ function normalizePatchSelections(value) {
 
   return Object.entries(value).reduce(
     (selections, [patchId, choiceId]) => {
-      if (
+      const isValidPatchId =
         typeof patchId === "string" &&
-        patchId.trim().length > 0 &&
+        patchId.trim().length > 0;
+
+      const isValidChoiceId =
         typeof choiceId === "string" &&
-        choiceId.trim().length > 0
-      ) {
+        choiceId.trim().length > 0;
+
+      if (isValidPatchId && isValidChoiceId) {
         selections[patchId] = choiceId;
       }
 
@@ -79,6 +85,15 @@ function normalizeAppState(value) {
     selectedSituation:
       typeof value.selectedSituation === "string"
         ? value.selectedSituation
+        : "",
+
+    selectedInterests: normalizeStringArray(
+      value.selectedInterests,
+    ),
+
+    experienceLevel:
+      typeof value.experienceLevel === "string"
+        ? value.experienceLevel
         : "",
 
     completedPatchIds: normalizeStringArray(
@@ -157,13 +172,17 @@ export function updateAppState(updater) {
   return setAppState(nextState);
 }
 
-export function saveOnboarding(
+export function saveOnboarding({
   selectedSituation,
-) {
+  selectedInterests,
+  experienceLevel,
+}) {
   return updateAppState((currentState) => ({
     ...currentState,
     onboardingCompleted: true,
     selectedSituation,
+    selectedInterests,
+    experienceLevel,
   }));
 }
 
