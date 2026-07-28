@@ -38,13 +38,16 @@ function requireEndpoint(name) {
   const endpoint =
     endpointTemplates[name];
 
-  if (!endpoint) {
+  if (
+    typeof endpoint !== "string" ||
+    endpoint.trim().length === 0
+  ) {
     throw new Error(
-      `${name} 서버 API 주소가 설정되지 않았습니다.`,
+      `${name} API 주소가 설정되지 않았습니다.`,
     );
   }
 
-  return endpoint;
+  return endpoint.trim();
 }
 
 function resolvePatchEndpoint(
@@ -57,7 +60,9 @@ function resolvePatchEndpoint(
   if (
     !endpoint.includes(":patchId")
   ) {
-    return endpoint;
+    throw new Error(
+      `${name} API 주소에 :patchId가 필요합니다.`,
+    );
   }
 
   return endpoint.replace(
@@ -70,7 +75,10 @@ function unwrapResponse(response) {
   if (
     response &&
     typeof response === "object" &&
-    "data" in response
+    Object.prototype.hasOwnProperty.call(
+      response,
+      "data",
+    )
   ) {
     return response.data;
   }
@@ -89,101 +97,122 @@ export const appStateApi = {
   },
 
   async saveOnboarding(payload) {
-    return httpClient.request(
-      requireEndpoint("onboarding"),
-      {
-        method: "PATCH",
-        body: payload,
-      },
-    );
+    const response =
+      await httpClient.request(
+        requireEndpoint("onboarding"),
+        {
+          method: "PATCH",
+          body: payload,
+        },
+      );
+
+    return unwrapResponse(response);
   },
 
   async savePatchSelection(
     patchId,
     choiceId,
   ) {
-    return httpClient.request(
-      resolvePatchEndpoint(
-        "patchSelection",
-        patchId,
-      ),
-      {
-        method: "POST",
-        body: {
-          choiceId,
+    const response =
+      await httpClient.request(
+        resolvePatchEndpoint(
+          "patchSelection",
+          patchId,
+        ),
+        {
+          method: "POST",
+          body: {
+            choiceId,
+          },
         },
-      },
-    );
+      );
+
+    return unwrapResponse(response);
   },
 
   async savePatchReviewSelection(
     patchId,
     choiceId,
   ) {
-    return httpClient.request(
-      resolvePatchEndpoint(
-        "patchReviewSelection",
-        patchId,
-      ),
-      {
-        method: "POST",
-        body: {
-          choiceId,
+    const response =
+      await httpClient.request(
+        resolvePatchEndpoint(
+          "patchReviewSelection",
+          patchId,
+        ),
+        {
+          method: "POST",
+          body: {
+            choiceId,
+          },
         },
-      },
-    );
+      );
+
+    return unwrapResponse(response);
   },
 
   async savePatchProgress(
     patchId,
     step,
   ) {
-    return httpClient.request(
-      resolvePatchEndpoint(
-        "patchProgress",
-        patchId,
-      ),
-      {
-        method: "PATCH",
-        body: {
-          step,
+    const response =
+      await httpClient.request(
+        resolvePatchEndpoint(
+          "patchProgress",
+          patchId,
+        ),
+        {
+          method: "PATCH",
+          body: {
+            step,
+          },
         },
-      },
-    );
+      );
+
+    return unwrapResponse(response);
   },
 
   async completePatchReview(
     patchId,
   ) {
-    return httpClient.request(
-      resolvePatchEndpoint(
-        "patchReviewComplete",
-        patchId,
-      ),
-      {
-        method: "POST",
-      },
-    );
+    const response =
+      await httpClient.request(
+        resolvePatchEndpoint(
+          "patchReviewComplete",
+          patchId,
+        ),
+        {
+          method: "POST",
+        },
+      );
+
+    return unwrapResponse(response);
   },
 
   async completePatch(patchId) {
-    return httpClient.request(
-      resolvePatchEndpoint(
-        "patchComplete",
-        patchId,
-      ),
-      {
-        method: "POST",
-      },
-    );
+    const response =
+      await httpClient.request(
+        resolvePatchEndpoint(
+          "patchComplete",
+          patchId,
+        ),
+        {
+          method: "POST",
+        },
+      );
+
+    return unwrapResponse(response);
   },
 
   async resetState() {
-    return httpClient.request(
-      requireEndpoint("resetState"),
-      {
-        method: "DELETE",
-      },
-    );
+    const response =
+      await httpClient.request(
+        requireEndpoint("resetState"),
+        {
+          method: "DELETE",
+        },
+      );
+
+    return unwrapResponse(response);
   },
 };
