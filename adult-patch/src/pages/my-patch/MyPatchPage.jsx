@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
+import characterMain from "../../assets/images/characters/character-main.png";
+
 import CharacterStage from "../../components/brand/CharacterStage";
 import PrimaryButton from "../../components/common/PrimaryButton";
 import AppLayout from "../../components/layout/AppLayout";
@@ -24,38 +26,44 @@ function MyPatchPage() {
   return (
     <AppLayout
       showBottomNavigation
-      className="page my-patch-page"
+      className="px-[22px] pt-[calc(24px+env(safe-area-inset-top))] pb-9"
     >
-      <header className="page-header">
-        <p className="eyebrow">
+      <header>
+        <p className="mb-2 text-[13px] font-bold text-brand-600">
           나의 어른 능력
         </p>
 
-        <h1>나의 패치</h1>
+        <h1 className="text-[30px] font-extrabold tracking-[-0.045em] text-content">
+          나의 패치
+        </h1>
 
-        <p>
+        <p className="mt-[14px] text-[15px] leading-[1.55] tracking-[-0.025em] text-content-secondary">
           지금까지 배우고 실천한 생활 능력을
           확인할 수 있어요.
         </p>
       </header>
 
       {completedPatches.length > 0 ? (
-        <section className="choice-list">
+        <section className="mt-[30px] grid gap-3 pb-3">
           {completedPatches.map((patch) => (
             <article
               key={patch.id}
-              className="completed-patch-card"
+              className="flex items-start gap-4 rounded-3xl border border-brand-100 bg-brand-50 p-[21px]"
             >
-              <div className="completed-patch-card__symbol">
+              <div className="flex size-[42px] flex-none items-center justify-center rounded-[14px] bg-brand-500 font-extrabold text-white">
                 ✓
               </div>
 
               <div>
-                <span>{patch.category}</span>
+                <span className="text-xs font-bold text-brand-600">
+                  {patch.category}
+                </span>
 
-                <h2>{patch.title}</h2>
+                <h2 className="mt-[6px] text-[17px] leading-[1.45] font-extrabold tracking-[-0.03em] text-content">
+                  {patch.title}
+                </h2>
 
-                <p>
+                <p className="mt-[7px] text-[13px] leading-[1.5] text-content-secondary">
                   새로운 어른 능력이
                   업데이트됐어요.
                 </p>
@@ -64,14 +72,19 @@ function MyPatchPage() {
           ))}
         </section>
       ) : (
-        <section className="empty-state empty-state--character">
-          <CharacterStage size="small" />
+        <section className="flex flex-1 flex-col items-center justify-center pb-[50px] text-center">
+          <CharacterStage
+            src={characterMain}
+            alt="어른패치 캐릭터"
+            size="small"
+            className="mb-[14px]"
+          />
 
-          <h2>
+          <h2 className="text-xl font-extrabold tracking-[-0.035em] text-content">
             아직 완료한 패치가 없어요.
           </h2>
 
-          <p>
+          <p className="mt-[10px] mb-6 max-w-[290px] text-sm leading-[1.6] text-content-secondary">
             오늘의 패치를 완료하면 여기에
             새로운 생활 능력이 기록됩니다.
           </p>

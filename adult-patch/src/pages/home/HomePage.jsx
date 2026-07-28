@@ -33,12 +33,6 @@ function HomePage() {
     [appState],
   );
 
-  const completedPatchCount =
-    appState.completedPatchIds.length;
-
-  const completedMissionCount =
-    appState.completedMissionIds.length;
-
   const situationOption =
     getSituationOption(
       appState.selectedSituation,
@@ -54,15 +48,15 @@ function HomePage() {
   return (
     <AppLayout
       showBottomNavigation
-      className="page home-page"
+      className="gap-[26px] px-[22px] pt-[calc(24px+env(safe-area-inset-top))] pb-9"
     >
-      <header className="home-header">
+      <header className="flex items-start justify-between">
         <div>
-          <p className="eyebrow">
+          <p className="mb-2 text-[13px] font-bold text-brand-600">
             오늘의 어른패치
           </p>
 
-          <h1>
+          <h1 className="text-[28px] leading-[1.3] font-extrabold tracking-[-0.045em] text-content">
             오늘은 어떤 능력을
             <br />
             업데이트할까요?
@@ -70,7 +64,7 @@ function HomePage() {
         </div>
 
         <div
-          className="home-header__profile"
+          className="flex size-11 flex-none items-center justify-center rounded-full border-[3px] border-brand-100 bg-brand-500 text-sm font-extrabold text-white"
           aria-label="프로필"
         >
           어
@@ -81,36 +75,40 @@ function HomePage() {
         src={characterMain}
         alt="정장을 입은 어른패치 캐릭터"
         size="small"
-        className="home-page__character"
+        className="rounded-3xl border border-brand-100 bg-gradient-to-b from-[#f6f9ff] to-white px-2.5 pt-2.5 pb-1"
         message="처음이라 모르는 건 당연해요."
       />
 
-      <section className="home-status">
-        <div>
-          <span>완료한 패치</span>
+      <section className="grid grid-cols-2 gap-3">
+        <div className="rounded-[18px] bg-surface p-[18px]">
+          <span className="mb-[7px] block text-xs font-semibold text-content-secondary">
+            완료한 패치
+          </span>
 
-          <strong>
-            {completedPatchCount}개
+          <strong className="text-[22px] font-extrabold text-content">
+            {appState.completedPatchIds.length}개
           </strong>
         </div>
 
-        <div>
-          <span>완료한 미션</span>
+        <div className="rounded-[18px] bg-surface p-[18px]">
+          <span className="mb-[7px] block text-xs font-semibold text-content-secondary">
+            완료한 미션
+          </span>
 
-          <strong>
-            {completedMissionCount}개
+          <strong className="text-[22px] font-extrabold text-content">
+            {appState.completedMissionIds.length}개
           </strong>
         </div>
       </section>
 
-      <section className="home-profile-summary">
-        <div className="section-heading">
+      <section className="grid gap-[14px]">
+        <div className="flex items-end justify-between">
           <div>
-            <p className="eyebrow">
+            <p className="mb-2 text-[13px] font-bold text-brand-600">
               나의 관심 분야
             </p>
 
-            <h2>
+            <h2 className="text-[22px] font-extrabold tracking-[-0.04em] text-content">
               {situationOption?.shortLabel ??
                 "생활 전반"}
             </h2>
@@ -118,6 +116,7 @@ function HomePage() {
 
           <button
             type="button"
+            className="rounded-[10px] bg-surface px-[10px] py-[7px] text-[11px] font-bold text-content-secondary"
             onClick={() =>
               navigate("/onboarding")
             }
@@ -126,10 +125,13 @@ function HomePage() {
           </button>
         </div>
 
-        <div className="home-interest-list">
+        <div className="flex flex-wrap gap-2">
           {selectedInterestOptions.map(
             (option) => (
-              <span key={option.id}>
+              <span
+                key={option.id}
+                className="inline-flex min-h-8 items-center rounded-full border border-brand-100 bg-brand-50 px-3 py-[7px] text-xs font-bold text-brand-700"
+              >
                 {option.label}
               </span>
             ),
@@ -137,22 +139,24 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="recommended-section">
-        <div className="section-heading">
+      <section className="grid gap-4">
+        <div className="flex items-end justify-between">
           <div>
-            <p className="eyebrow">
+            <p className="mb-2 text-[13px] font-bold text-brand-600">
               맞춤 추천
             </p>
 
-            <h2>지금 시작하기 좋은 패치</h2>
+            <h2 className="text-[22px] font-extrabold tracking-[-0.04em] text-content">
+              지금 시작하기 좋은 패치
+            </h2>
           </div>
 
-          <span className="recommendation-count">
+          <span className="inline-flex min-h-[30px] min-w-[42px] items-center justify-center rounded-full bg-brand-50 px-[10px] py-[6px] text-xs font-bold text-brand-700">
             2개
           </span>
         </div>
 
-        <div className="recommendation-list recommendation-list--home">
+        <div className="grid gap-[14px]">
           {recommendedPatches.map(
             (patch, index) => {
               const isCompleted =
@@ -163,36 +167,38 @@ function HomePage() {
               return (
                 <article
                   key={patch.id}
-                  className="recommendation-card"
+                  className="shrink-0 rounded-3xl border border-line bg-white p-5 shadow-card"
                 >
-                  <div className="recommendation-card__top">
-                    <span className="recommendation-card__number">
+                  <div className="flex items-center justify-between">
+                    <span className="flex size-[31px] items-center justify-center rounded-[11px] bg-brand-500 text-[13px] font-extrabold text-white">
                       {index + 1}
                     </span>
 
-                    <span className="category-badge">
+                    <span className="rounded-full bg-brand-50 px-[10px] py-[7px] text-[11px] font-bold text-brand-700">
                       {patch.category}
                     </span>
                   </div>
 
-                  <span className="recommendation-card__level">
+                  <span className="mt-[17px] block text-xs font-bold text-brand-600">
                     {isCompleted
                       ? "완료한 패치"
                       : patch.level}
                   </span>
 
-                  <h3>{patch.title}</h3>
+                  <h3 className="mt-[7px] text-[19px] leading-[1.4] font-extrabold tracking-[-0.035em] text-content">
+                    {patch.title}
+                  </h3>
 
-                  <p className="recommendation-card__description">
+                  <p className="mt-[9px] text-[13px] leading-[1.55] tracking-[-0.02em] text-content-secondary">
                     {patch.description}
                   </p>
 
-                  <p className="recommendation-card__reason">
+                  <p className="mt-[14px] rounded-xl bg-brand-50 px-[13px] py-3 text-xs leading-[1.5] font-semibold text-brand-800">
                     {patch.recommendationReason}
                   </p>
 
-                  <div className="recommendation-card__footer">
-                    <span>
+                  <div className="mt-[17px] flex items-center justify-between">
+                    <span className="text-xs font-semibold text-content-tertiary">
                       {isCompleted
                         ? "패치 완료"
                         : `약 ${patch.estimatedMinutes}분`}
@@ -200,6 +206,7 @@ function HomePage() {
 
                     <button
                       type="button"
+                      className="min-h-[38px] rounded-xl bg-brand-600 px-[14px] py-[9px] text-[13px] font-bold text-white active:scale-[0.97]"
                       onClick={() =>
                         navigate(
                           `/patch/${patch.id}`,

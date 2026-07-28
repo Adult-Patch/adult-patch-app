@@ -14,6 +14,7 @@ import PrimaryButton from "../../components/common/PrimaryButton";
 import ProgressBar from "../../components/common/ProgressBar";
 import AppLayout from "../../components/layout/AppLayout";
 import { getPatchById } from "../../data/patches";
+
 import {
   getAppState,
   savePatchSelection,
@@ -66,11 +67,11 @@ function PatchPage() {
   };
 
   return (
-    <AppLayout className="page patch-page">
-      <div className="top-bar">
+    <AppLayout className="px-[22px] pt-[calc(24px+env(safe-area-inset-top))] pb-7">
+      <div className="grid grid-cols-[42px_1fr_42px] items-center text-center text-[13px] font-bold text-content-secondary">
         <button
           type="button"
-          className="icon-button"
+          className="flex size-[42px] items-center justify-center rounded-full bg-surface text-xl text-content"
           aria-label="이전 화면"
           onClick={() => navigate(-1)}
         >
@@ -79,7 +80,7 @@ function PatchPage() {
 
         <span>{patch.level}</span>
 
-        <span className="top-bar__empty" />
+        <span className="size-[42px]" />
       </div>
 
       <ProgressBar
@@ -87,26 +88,32 @@ function PatchPage() {
         total={patch.progress.total}
       />
 
-      <header className="page-header patch-page__header">
-        <p className="eyebrow">
+      <header className="mt-[30px]">
+        <p className="mb-2 text-[13px] font-bold text-brand-600">
           {patch.category}
         </p>
 
-        <h1>{patch.title}</h1>
+        <h1 className="text-[30px] leading-[1.25] font-extrabold tracking-[-0.045em] text-content">
+          {patch.title}
+        </h1>
       </header>
 
-      <section className="situation-card">
-        <span className="situation-card__label">
+      <section className="mt-6 rounded-3xl border border-brand-100 bg-brand-50 p-[21px]">
+        <span className="mb-[10px] inline-block text-xs font-extrabold text-brand-700">
           상황
         </span>
 
-        <p>{patch.situation}</p>
+        <p className="text-[15px] leading-[1.65] tracking-[-0.025em] text-content">
+          {patch.situation}
+        </p>
       </section>
 
-      <section className="patch-question">
-        <h2>{patch.question}</h2>
+      <section className="mt-[30px]">
+        <h2 className="text-xl leading-[1.4] font-extrabold tracking-[-0.035em] text-content">
+          {patch.question}
+        </h2>
 
-        <div className="choice-list">
+        <div className="mt-8 grid gap-3">
           {patch.choices.map((choice) => (
             <ChoiceButton
               key={choice.id}
@@ -123,7 +130,7 @@ function PatchPage() {
         </div>
       </section>
 
-      <div className="page-bottom-action">
+      <div className="mt-auto pt-8">
         <PrimaryButton
           disabled={!selectedChoiceId}
           onClick={handleSubmit}
