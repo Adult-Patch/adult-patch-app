@@ -11,6 +11,7 @@ const DEFAULT_APP_STATE = {
   patchSelections: {},
   patchReviewSelections: {},
   patchProgress: {},
+  patchCompletedAt: {},
 };
 
 function createDefaultAppState() {
@@ -23,6 +24,7 @@ function createDefaultAppState() {
     patchSelections: {},
     patchReviewSelections: {},
     patchProgress: {},
+    patchCompletedAt: {},
   };
 }
 
@@ -171,6 +173,10 @@ function normalizeAppState(value) {
     patchProgress: normalizeProgressRecord(
       value.patchProgress,
     ),
+
+    patchCompletedAt: normalizeStringRecord(
+      value.patchCompletedAt,
+    ),
   };
 }
 
@@ -181,7 +187,9 @@ export function getAppState() {
 
   try {
     const storedState =
-      window.localStorage.getItem(STORAGE_KEY);
+      window.localStorage.getItem(
+        STORAGE_KEY,
+      );
 
     if (!storedState) {
       return createDefaultAppState();
@@ -326,35 +334,47 @@ export function completePatchReview(
 
 export function completePatch(patchId) {
   return updateAppState(
-    (currentState) => ({
-      ...currentState,
+    (currentState) => {
+      const completedAt =
+        currentState.patchCompletedAt[
+          patchId
+        ] ?? new Date().toISOString();
 
-      completedPatchIds: [
-        ...new Set([
-          ...currentState.completedPatchIds,
-          patchId,
-        ]),
-      ],
+      return {
+        ...currentState,
 
-      completedMissionIds: [
-        ...new Set([
-          ...currentState.completedMissionIds,
-          patchId,
-        ]),
-      ],
+        completedPatchIds: [
+          ...new Set([
+            ...currentState.completedPatchIds,
+            patchId,
+          ]),
+        ],
 
-      reviewCompletedPatchIds: [
-        ...new Set([
-          ...currentState.reviewCompletedPatchIds,
-          patchId,
-        ]),
-      ],
+        completedMissionIds: [
+          ...new Set([
+            ...currentState.completedMissionIds,
+            patchId,
+          ]),
+        ],
 
-      patchProgress: {
-        ...currentState.patchProgress,
-        [patchId]: 3,
-      },
-    }),
+        reviewCompletedPatchIds: [
+          ...new Set([
+            ...currentState.reviewCompletedPatchIds,
+            patchId,
+          ]),
+        ],
+
+        patchProgress: {
+          ...currentState.patchProgress,
+          [patchId]: 3,
+        },
+
+        patchCompletedAt: {
+          ...currentState.patchCompletedAt,
+          [patchId]: completedAt,
+        },
+      };
+    },
   );
 }
 
