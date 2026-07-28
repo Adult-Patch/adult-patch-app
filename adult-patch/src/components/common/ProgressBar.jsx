@@ -9,8 +9,8 @@ function ProgressBar({ current, total }) {
     (safeCurrent / safeTotal) * 100;
 
   return (
-    <div className="progress">
-      <div className="progress__information">
+    <div className="mt-5">
+      <div className="mb-2 flex justify-between text-xs font-bold text-content-secondary">
         <span>
           {safeCurrent} / {safeTotal}
         </span>
@@ -19,14 +19,14 @@ function ProgressBar({ current, total }) {
       </div>
 
       <div
-        className="progress__track"
+        className="h-[7px] w-full overflow-hidden rounded-full bg-surface-strong"
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={safeTotal}
         aria-valuenow={safeCurrent}
       >
         <div
-          className="progress__value"
+          className="h-full rounded-full bg-brand-500 transition-[width] duration-200"
           style={{ width: `${progress}%` }}
         />
       </div>

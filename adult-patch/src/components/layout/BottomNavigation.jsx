@@ -24,6 +24,7 @@ function NavigationIcon({ type }) {
       <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
+        className="size-full"
       >
         <path
           d="M4 10.5 12 4l8 6.5v8a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-8Z"
@@ -51,6 +52,7 @@ function NavigationIcon({ type }) {
       <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
+        className="size-full"
       >
         <circle
           cx="12"
@@ -77,6 +79,7 @@ function NavigationIcon({ type }) {
     <svg
       viewBox="0 0 24 24"
       aria-hidden="true"
+      className="size-full"
     >
       <rect
         x="4"
@@ -104,7 +107,7 @@ function NavigationIcon({ type }) {
 function BottomNavigation() {
   return (
     <nav
-      className="bottom-navigation"
+      className="grid h-[calc(78px+env(safe-area-inset-bottom))] flex-none grid-cols-3 border-t border-line bg-white/95 px-5 pt-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg"
       aria-label="주요 메뉴"
     >
       {navigationItems.map((item) => (
@@ -114,22 +117,22 @@ function BottomNavigation() {
           end
           className={({ isActive }) =>
             [
-              "bottom-navigation__item",
+              "flex flex-col items-center justify-center gap-1",
+              "text-[11px] leading-none font-bold tracking-[-0.025em]",
+              "transition-colors",
               isActive
-                ? "bottom-navigation__item--active"
-                : "",
+                ? "text-brand-600"
+                : "text-content-tertiary",
             ]
               .filter(Boolean)
               .join(" ")
           }
         >
-          <span className="bottom-navigation__icon">
+          <span className="flex size-[25px] items-center justify-center">
             <NavigationIcon type={item.icon} />
           </span>
 
-          <span className="bottom-navigation__label">
-            {item.label}
-          </span>
+          <span>{item.label}</span>
         </NavLink>
       ))}
     </nav>

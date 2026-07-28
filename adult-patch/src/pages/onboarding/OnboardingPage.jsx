@@ -115,28 +115,44 @@ function OnboardingPage() {
     navigate("/onboarding/result");
   };
 
+  const renderHeader = ({
+    eyebrow,
+    title,
+    description,
+  }) => (
+    <header className="mt-[30px]">
+      <p className="mb-2 text-[13px] leading-[1.3] font-bold tracking-[-0.02em] text-brand-600">
+        {eyebrow}
+      </p>
+
+      <h1 className="text-[30px] leading-[1.25] font-extrabold tracking-[-0.045em] text-content">
+        {title}
+      </h1>
+
+      <p className="mt-[14px] text-[15px] leading-[1.55] tracking-[-0.025em] text-content-secondary">
+        {description}
+      </p>
+    </header>
+  );
+
   const renderStepContent = () => {
     if (currentStep === 1) {
       return (
         <>
-          <header className="page-header onboarding-step-header">
-            <p className="eyebrow">
-              현재 생활 상황
-            </p>
+          {renderHeader({
+            eyebrow: "현재 생활 상황",
+            title: (
+              <>
+                지금 어떤 생활을
+                <br />
+                준비하고 있나요?
+              </>
+            ),
+            description:
+              "현재 상황을 기준으로 먼저 필요한 생활 능력을 찾아드릴게요.",
+          })}
 
-            <h1>
-              지금 어떤 생활을
-              <br />
-              준비하고 있나요?
-            </h1>
-
-            <p>
-              현재 상황을 기준으로 먼저 필요한
-              생활 능력을 찾아드릴게요.
-            </p>
-          </header>
-
-          <section className="choice-list onboarding-options">
+          <section className="mt-8 grid gap-3 pb-3">
             {SITUATION_OPTIONS.map(
               (option) => (
                 <ChoiceButton
@@ -163,25 +179,21 @@ function OnboardingPage() {
     if (currentStep === 2) {
       return (
         <>
-          <header className="page-header onboarding-step-header">
-            <p className="eyebrow">
-              어려운 생활 분야
-            </p>
+          {renderHeader({
+            eyebrow: "어려운 생활 분야",
+            title: (
+              <>
+                어떤 부분이
+                <br />
+                가장 어렵게 느껴지나요?
+              </>
+            ),
+            description:
+              "지금 배우고 싶은 분야를 최대 두 개까지 선택해주세요.",
+          })}
 
-            <h1>
-              어떤 부분이
-              <br />
-              가장 어렵게 느껴지나요?
-            </h1>
-
-            <p>
-              지금 배우고 싶은 분야를 최대
-              두 개까지 선택해주세요.
-            </p>
-          </header>
-
-          <div className="onboarding-selection-note">
-            <span>
+          <div className="mt-6 flex justify-between rounded-xl bg-surface px-[14px] py-3 text-xs font-bold text-content-secondary">
+            <span className="text-brand-600">
               선택 {selectedInterests.length}
             </span>
 
@@ -190,7 +202,7 @@ function OnboardingPage() {
             </span>
           </div>
 
-          <section className="choice-list onboarding-options">
+          <section className="mt-3 grid gap-3 pb-3">
             {INTEREST_OPTIONS.map(
               (option) => {
                 const isSelected =
@@ -212,12 +224,12 @@ function OnboardingPage() {
                       toggleInterest(option.id)
                     }
                   >
-                    <span className="onboarding-option-content">
-                      <strong>
+                    <span className="grid gap-[5px]">
+                      <strong className="text-[15px] leading-[1.4] font-bold text-content">
                         {option.label}
                       </strong>
 
-                      <span>
+                      <span className="text-xs leading-[1.45] font-medium text-content-secondary">
                         {option.description}
                       </span>
                     </span>
@@ -232,24 +244,20 @@ function OnboardingPage() {
 
     return (
       <>
-        <header className="page-header onboarding-step-header">
-          <p className="eyebrow">
-            현재 경험 정도
-          </p>
+        {renderHeader({
+          eyebrow: "현재 경험 정도",
+          title: (
+            <>
+              혼자 해결해본 경험이
+              <br />
+              어느 정도인가요?
+            </>
+          ),
+          description:
+            "경험 정도에 맞춰 기본편과 실전편을 구분해 추천해드릴게요.",
+        })}
 
-          <h1>
-            혼자 해결해본 경험이
-            <br />
-            어느 정도인가요?
-          </h1>
-
-          <p>
-            경험 정도에 맞춰 기본편과 실전편을
-            구분해 추천해드릴게요.
-          </p>
-        </header>
-
-        <section className="choice-list onboarding-options">
+        <section className="mt-8 grid gap-3 pb-3">
           {EXPERIENCE_OPTIONS.map(
             (option) => (
               <ChoiceButton
@@ -271,11 +279,11 @@ function OnboardingPage() {
   };
 
   return (
-    <AppLayout className="page onboarding-page">
-      <div className="onboarding-top-bar">
+    <AppLayout className="px-[22px] pt-[calc(24px+env(safe-area-inset-top))] pb-7">
+      <div className="grid grid-cols-[42px_1fr_42px] items-center">
         <button
           type="button"
-          className="icon-button"
+          className="flex size-[42px] items-center justify-center rounded-full bg-surface text-xl text-content"
           aria-label="이전 단계"
           onClick={handleBack}
         >
@@ -284,10 +292,10 @@ function OnboardingPage() {
 
         <BrandLogo
           size="small"
-          className="onboarding-top-bar__logo"
+          className="w-[92px] justify-self-center"
         />
 
-        <span className="onboarding-top-bar__empty" />
+        <span className="size-[42px]" />
       </div>
 
       <ProgressBar
@@ -297,7 +305,7 @@ function OnboardingPage() {
 
       {renderStepContent()}
 
-      <div className="page-bottom-action">
+      <div className="mt-auto pt-8">
         <PrimaryButton
           disabled={!isCurrentStepComplete}
           onClick={handleNext}

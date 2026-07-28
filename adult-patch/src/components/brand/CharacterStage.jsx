@@ -1,3 +1,9 @@
+const visualSizeClassNames = {
+  small: "h-[138px] w-[150px]",
+  medium: "h-[190px] w-[210px]",
+  large: "h-[235px] w-[270px]",
+};
+
 function CharacterStage({
   src,
   alt = "어른패치 캐릭터",
@@ -6,8 +12,7 @@ function CharacterStage({
   message = "",
 }) {
   const stageClassName = [
-    "character-stage",
-    `character-stage--${size}`,
+    "flex w-full flex-col items-center",
     className,
   ]
     .filter(Boolean)
@@ -15,46 +20,35 @@ function CharacterStage({
 
   return (
     <div className={stageClassName}>
-      <div className="character-stage__visual">
+      <div
+        className={[
+          "relative flex items-end justify-center",
+          visualSizeClassNames[size] ??
+            visualSizeClassNames.medium,
+        ].join(" ")}
+      >
         {src ? (
           <img
-            className="character-stage__image"
+            className="relative z-10 block max-h-[92%] max-w-[92%] object-contain"
             src={src}
             alt={alt}
           />
         ) : (
           <div
-            className="character-stage__placeholder"
+            className="relative z-10 flex h-[82%] w-[68%] items-center justify-center rounded-[40%] border-4 border-brand-800 bg-brand-500"
             aria-hidden="true"
           >
-            <span className="character-stage__head">
-              <span className="character-stage__eye character-stage__eye--left" />
-              <span className="character-stage__eye character-stage__eye--right" />
-              <span className="character-stage__mouth" />
+            <span className="rounded-full bg-white/90 px-3 py-2 text-xs font-extrabold text-brand-800">
+              어른패치
             </span>
-
-            <span className="character-stage__body">
-              <span className="character-stage__shirt" />
-
-              <span className="character-stage__lapel character-stage__lapel--left" />
-              <span className="character-stage__lapel character-stage__lapel--right" />
-
-              <span className="character-stage__tie">
-                <span className="character-stage__tie-knot" />
-                <span className="character-stage__tie-body" />
-              </span>
-            </span>
-
-            <span className="character-stage__arm character-stage__arm--left" />
-            <span className="character-stage__arm character-stage__arm--right" />
           </div>
         )}
 
-        <span className="character-stage__ground" />
+        <span className="absolute right-[8%] bottom-[3%] left-[8%] h-3 rounded-full bg-brand-100" />
       </div>
 
       {message && (
-        <p className="character-stage__message">
+        <p className="mt-3 inline-flex max-w-[310px] rounded-[18px_18px_18px_5px] border border-brand-100 bg-brand-50 px-4 py-[11px] text-center text-[13px] leading-[1.45] font-semibold tracking-[-0.02em] text-brand-800">
           {message}
         </p>
       )}

@@ -23,8 +23,8 @@ function SplashPage() {
   };
 
   return (
-    <AppLayout className="splash-page splash-page--brand">
-      <section className="splash-brand-content">
+    <AppLayout className="justify-between px-7 pt-[calc(64px+env(safe-area-inset-top))] pb-[calc(30px+env(safe-area-inset-bottom))]">
+      <section className="flex flex-1 items-center justify-center">
         <BrandLogo
           size="large"
           showDescription
