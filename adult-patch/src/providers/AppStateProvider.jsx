@@ -3,7 +3,6 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 
@@ -42,9 +41,10 @@ function AppStateErrorScreen({
           사용자 정보를 불러오지 못했어요.
         </h1>
 
-        <p className="mt-3 text-sm leading-[1.6] text-content-secondary">
-          {error?.message ??
-            "잠시 후 다시 시도해주세요."}
+        <p className="mt-3 break-words text-sm leading-[1.6] text-content-secondary">
+          {error instanceof Error
+            ? error.message
+            : "잠시 후 다시 시도해주세요."}
         </p>
 
         <button
@@ -62,8 +62,6 @@ function AppStateErrorScreen({
 export function AppStateProvider({
   children,
 }) {
-  const mountedRef = useRef(true);
-
   const [appState, setAppState] =
     useState(null);
 
@@ -77,8 +75,34 @@ export function AppStateProvider({
     useState(null);
 
   useEffect(() => {
+    let active = true;
+
+    const initialize = async () => {
+      setInitializing(true);
+      setError(null);
+
+      try {
+        const nextState =
+          await appStateService.getState();
+
+        if (active) {
+          setAppState(nextState);
+        }
+      } catch (initializationError) {
+        if (active) {
+          setError(initializationError);
+        }
+      } finally {
+        if (active) {
+          setInitializing(false);
+        }
+      }
+    };
+
+    void initialize();
+
     return () => {
-      mountedRef.current = false;
+      active = false;
     };
   }, []);
 
@@ -91,31 +115,19 @@ export function AppStateProvider({
         const nextState =
           await appStateService.getState();
 
-        if (mountedRef.current) {
-          setAppState(nextState);
-        }
+        setAppState(nextState);
 
         return nextState;
       } catch (refreshError) {
-        if (mountedRef.current) {
-          setError(refreshError);
-        }
+        setError(refreshError);
 
         throw refreshError;
       } finally {
-        if (mountedRef.current) {
-          setInitializing(false);
-        }
+        setInitializing(false);
       }
     },
     [],
   );
-
-  useEffect(() => {
-    refresh().catch(() => {
-      // 오류 화면에서 재시도를 제공합니다.
-    });
-  }, [refresh]);
 
   const runMutation = useCallback(
     async (mutation) => {
@@ -126,21 +138,15 @@ export function AppStateProvider({
         const nextState =
           await mutation();
 
-        if (mountedRef.current) {
-          setAppState(nextState);
-        }
+        setAppState(nextState);
 
         return nextState;
       } catch (mutationError) {
-        if (mountedRef.current) {
-          setError(mutationError);
-        }
+        setError(mutationError);
 
         throw mutationError;
       } finally {
-        if (mountedRef.current) {
-          setSaving(false);
-        }
+        setSaving(false);
       }
     },
     [],
@@ -263,7 +269,7 @@ export function AppStateProvider({
         error={error}
         onRetry={() => {
           refresh().catch(() => {
-            // 재시도 실패 시 오류 화면을 유지합니다.
+            // 오류 화면을 유지합니다.
           });
         }}
       />

@@ -1,5 +1,8 @@
 import { appStateApi } from "../../api/appStateApi";
-import { normalizeAppState } from "../../models/appState";
+
+import {
+  normalizeAppState,
+} from "../../models/appState";
 
 async function getState() {
   const state =
@@ -8,19 +11,19 @@ async function getState() {
   return normalizeAppState(state);
 }
 
-async function mutateAndRefresh(
+async function normalizeMutation(
   mutation,
 ) {
-  await mutation();
+  const state = await mutation();
 
-  return getState();
+  return normalizeAppState(state);
 }
 
 export const remoteAppStateRepository = {
   getState,
 
   async saveOnboarding(payload) {
-    return mutateAndRefresh(() =>
+    return normalizeMutation(() =>
       appStateApi.saveOnboarding(
         payload,
       ),
@@ -31,7 +34,7 @@ export const remoteAppStateRepository = {
     patchId,
     choiceId,
   ) {
-    return mutateAndRefresh(() =>
+    return normalizeMutation(() =>
       appStateApi.savePatchSelection(
         patchId,
         choiceId,
@@ -43,7 +46,7 @@ export const remoteAppStateRepository = {
     patchId,
     choiceId,
   ) {
-    return mutateAndRefresh(() =>
+    return normalizeMutation(() =>
       appStateApi.savePatchReviewSelection(
         patchId,
         choiceId,
@@ -55,7 +58,7 @@ export const remoteAppStateRepository = {
     patchId,
     step,
   ) {
-    return mutateAndRefresh(() =>
+    return normalizeMutation(() =>
       appStateApi.savePatchProgress(
         patchId,
         step,
@@ -66,7 +69,7 @@ export const remoteAppStateRepository = {
   async completePatchReview(
     patchId,
   ) {
-    return mutateAndRefresh(() =>
+    return normalizeMutation(() =>
       appStateApi.completePatchReview(
         patchId,
       ),
@@ -74,7 +77,7 @@ export const remoteAppStateRepository = {
   },
 
   async completePatch(patchId) {
-    return mutateAndRefresh(() =>
+    return normalizeMutation(() =>
       appStateApi.completePatch(
         patchId,
       ),
@@ -82,7 +85,7 @@ export const remoteAppStateRepository = {
   },
 
   async resetState() {
-    return mutateAndRefresh(() =>
+    return normalizeMutation(() =>
       appStateApi.resetState(),
     );
   },

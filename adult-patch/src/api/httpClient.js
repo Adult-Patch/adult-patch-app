@@ -4,6 +4,17 @@ const rawBaseUrl =
 const API_BASE_URL =
   rawBaseUrl.replace(/\/+$/, "");
 
+const configuredTimeout = Number(
+  import.meta.env
+    .VITE_API_TIMEOUT_MS ?? 10000,
+);
+
+const REQUEST_TIMEOUT_MS =
+  Number.isFinite(configuredTimeout) &&
+  configuredTimeout > 0
+    ? configuredTimeout
+    : 10000;
+
 let accessTokenProvider = () => null;
 
 export class HttpError extends Error {
@@ -33,9 +44,7 @@ export function setAccessTokenProvider(
 }
 
 function createRequestUrl(path) {
-  if (
-    /^https?:\/\//i.test(path)
-  ) {
+  if (/^https?:\/\//i.test(path)) {
     return path;
   }
 
@@ -52,6 +61,13 @@ async function parseResponse(response) {
     return null;
   }
 
+  const responseText =
+    await response.text();
+
+  if (!responseText) {
+    return null;
+  }
+
   const contentType =
     response.headers.get(
       "content-type",
@@ -62,10 +78,16 @@ async function parseResponse(response) {
       "application/json",
     )
   ) {
-    return response.json();
+    try {
+      return JSON.parse(responseText);
+    } catch {
+      throw new Error(
+        "서버 응답을 해석하지 못했습니다.",
+      );
+    }
   }
 
-  return response.text();
+  return responseText;
 }
 
 export async function request(
@@ -78,6 +100,9 @@ export async function request(
     signal,
   } = {},
 ) {
+  const requestUrl =
+    createRequestUrl(path);
+
   const accessToken =
     accessTokenProvider();
 
@@ -103,34 +128,96 @@ export async function request(
       `Bearer ${accessToken}`;
   }
 
-  const response = await fetch(
-    createRequestUrl(path),
-    {
-      method,
-      headers: requestHeaders,
-      body: requestBody,
-      credentials,
-      signal,
-    },
-  );
+  const controller =
+    new AbortController();
 
-  const responseData =
-    await parseResponse(response);
+  const handleExternalAbort = () => {
+    controller.abort();
+  };
 
-  if (!response.ok) {
-    const errorMessage =
-      responseData?.message ??
-      responseData?.error ??
-      `요청 처리에 실패했습니다. (${response.status})`;
-
-    throw new HttpError({
-      message: errorMessage,
-      status: response.status,
-      data: responseData,
-    });
+  if (signal) {
+    if (signal.aborted) {
+      controller.abort();
+    } else {
+      signal.addEventListener(
+        "abort",
+        handleExternalAbort,
+        {
+          once: true,
+        },
+      );
+    }
   }
 
-  return responseData;
+  const timeoutId = window.setTimeout(
+    () => {
+      controller.abort();
+    },
+    REQUEST_TIMEOUT_MS,
+  );
+
+  try {
+    const response = await fetch(
+      requestUrl,
+      {
+        method,
+        headers: requestHeaders,
+        body: requestBody,
+        credentials,
+        signal: controller.signal,
+      },
+    );
+
+    const responseData =
+      await parseResponse(response);
+
+    if (!response.ok) {
+      const errorMessage =
+        responseData?.message ??
+        responseData?.error ??
+        `요청 처리에 실패했습니다. (${response.status})`;
+
+      throw new HttpError({
+        message: errorMessage,
+        status: response.status,
+        data: responseData,
+      });
+    }
+
+    return responseData;
+  } catch (requestError) {
+    if (
+      requestError instanceof HttpError
+    ) {
+      throw requestError;
+    }
+
+    if (
+      requestError?.name ===
+      "AbortError"
+    ) {
+      throw new Error(
+        "서버 응답 시간이 초과되었습니다.",
+      );
+    }
+
+    if (
+      requestError instanceof TypeError
+    ) {
+      throw new Error(
+        `서버에 연결할 수 없습니다. 서버 주소를 확인해주세요: ${API_BASE_URL}`,
+      );
+    }
+
+    throw requestError;
+  } finally {
+    window.clearTimeout(timeoutId);
+
+    signal?.removeEventListener(
+      "abort",
+      handleExternalAbort,
+    );
+  }
 }
 
 export const httpClient = {
