@@ -12,7 +12,7 @@ import AppLayout from "../../components/layout/AppLayout";
 import PatchListCard from "../../components/patch/PatchListCard";
 import { PATCH_CATEGORIES } from "../../data/categories";
 import { patches } from "../../data/patches";
-import { getAppState } from "../../utils/appStorage";
+import { useAppState } from "../../hooks/useAppState";
 
 function normalizeSearchText(value) {
   return value
@@ -49,9 +49,7 @@ function ExplorePage() {
   const navigate = useNavigate();
   const categorySliderRef = useRef(null);
 
-  const [appState] = useState(() =>
-    getAppState(),
-  );
+  const { appState } = useAppState();
 
   const [searchQuery, setSearchQuery] =
     useState("");
@@ -113,8 +111,9 @@ function ExplorePage() {
     );
 
     const resizeObserver =
-      typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(
+      typeof window.ResizeObserver !==
+      "undefined"
+        ? new window.ResizeObserver(
             updateCategoryScrollState,
           )
         : null;
@@ -174,14 +173,17 @@ function ExplorePage() {
 
   const completedPatchIdSet = useMemo(
     () =>
-      new Set(appState.completedPatchIds),
+      new Set(
+        appState.completedPatchIds,
+      ),
     [appState.completedPatchIds],
   );
 
   const selectedCategory =
     PATCH_CATEGORIES.find(
       (category) =>
-        category.id === selectedCategoryId,
+        category.id ===
+        selectedCategoryId,
     );
 
   const scrollCategories = (direction) => {
@@ -192,11 +194,14 @@ function ExplorePage() {
       return;
     }
 
+    const scrollDistance =
+      slider.clientWidth * 0.72;
+
     slider.scrollBy({
       left:
         direction === "left"
-          ? -slider.clientWidth * 0.72
-          : slider.clientWidth * 0.72,
+          ? -scrollDistance
+          : scrollDistance,
       behavior: "smooth",
     });
   };
@@ -247,7 +252,13 @@ function ExplorePage() {
       </header>
 
       <section
-        className="mt-[27px] flex min-h-[54px] w-full items-center rounded-[17px] border-[1.5px] border-transparent bg-surface px-[15px] transition focus-within:border-brand-400 focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgb(70_121_239/10%)]"
+        className={[
+          "mt-[27px] flex min-h-[54px] w-full items-center",
+          "rounded-[17px] border-[1.5px] border-transparent",
+          "bg-surface px-[15px] transition",
+          "focus-within:border-brand-400 focus-within:bg-white",
+          "focus-within:shadow-[0_0_0_4px_rgb(70_121_239/10%)]",
+        ].join(" ")}
         aria-label="패치 검색"
       >
         <span
@@ -282,9 +293,15 @@ function ExplorePage() {
           value={searchQuery}
           placeholder="세탁, 계약, 월급처럼 검색해보세요."
           aria-label="패치 검색어"
-          className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm font-medium tracking-[-0.025em] text-content outline-none placeholder:text-content-tertiary"
+          className={[
+            "min-w-0 flex-1 border-0 bg-transparent p-0",
+            "text-sm font-medium tracking-[-0.025em] text-content",
+            "outline-none placeholder:text-content-tertiary",
+          ].join(" ")}
           onChange={(event) =>
-            setSearchQuery(event.target.value)
+            setSearchQuery(
+              event.target.value,
+            )
           }
         />
 
@@ -293,7 +310,9 @@ function ExplorePage() {
             type="button"
             className="ml-2 flex size-[27px] flex-none items-center justify-center rounded-full bg-surface-strong text-lg text-content-secondary"
             aria-label="검색어 지우기"
-            onClick={() => setSearchQuery("")}
+            onClick={() =>
+              setSearchQuery("")
+            }
           >
             ×
           </button>
@@ -301,12 +320,27 @@ function ExplorePage() {
       </section>
 
       <section
-        className="mt-[18px] grid w-full grid-cols-[36px_minmax(0,1fr)_36px] items-center gap-2 max-[359px]:grid-cols-[32px_minmax(0,1fr)_32px] max-[359px]:gap-[6px]"
+        className={[
+          "mt-[18px] grid w-full",
+          "grid-cols-[36px_minmax(0,1fr)_36px]",
+          "items-center gap-2",
+          "max-[359px]:grid-cols-[32px_minmax(0,1fr)_32px]",
+          "max-[359px]:gap-[6px]",
+        ].join(" ")}
         aria-label="생활 분야 선택"
       >
         <button
           type="button"
-          className="flex size-9 items-center justify-center rounded-full border border-brand-100 bg-brand-50 text-brand-700 shadow-card transition enabled:active:scale-95 disabled:border-transparent disabled:bg-surface disabled:text-content-tertiary disabled:opacity-35 disabled:shadow-none max-[359px]:size-8"
+          className={[
+            "flex size-9 items-center justify-center rounded-full",
+            "border border-brand-100 bg-brand-50 text-brand-700",
+            "shadow-card transition",
+            "enabled:active:scale-95",
+            "disabled:border-transparent disabled:bg-surface",
+            "disabled:text-content-tertiary disabled:opacity-35",
+            "disabled:shadow-none",
+            "max-[359px]:size-8",
+          ].join(" ")}
           aria-label="이전 생활 분야"
           disabled={!canScrollCategoryLeft}
           onClick={() =>
@@ -318,8 +352,16 @@ function ExplorePage() {
 
         <div
           ref={categorySliderRef}
-          className="hide-scrollbar flex min-w-0 gap-2 overflow-x-auto overflow-y-hidden px-0.5 py-2 scroll-smooth snap-x snap-proximity overscroll-x-contain touch-pan-x"
-          onScroll={updateCategoryScrollState}
+          className={[
+            "hide-scrollbar flex min-w-0 gap-2",
+            "overflow-x-auto overflow-y-hidden",
+            "px-0.5 py-2",
+            "scroll-smooth snap-x snap-proximity",
+            "overscroll-x-contain touch-pan-x",
+          ].join(" ")}
+          onScroll={
+            updateCategoryScrollState
+          }
         >
           {PATCH_CATEGORIES.map(
             (category) => {
@@ -332,9 +374,11 @@ function ExplorePage() {
                   key={category.id}
                   type="button"
                   className={[
-                    "min-h-[38px] flex-none snap-center rounded-full border px-[15px] py-[9px]",
-                    "text-[13px] leading-[1.3] font-bold tracking-[-0.025em]",
-                    "transition active:scale-[0.97]",
+                    "min-h-[38px] flex-none snap-center",
+                    "rounded-full border px-[15px] py-[9px]",
+                    "text-[13px] leading-[1.3] font-bold",
+                    "tracking-[-0.025em] transition",
+                    "active:scale-[0.97]",
                     isSelected
                       ? "border-brand-600 bg-brand-600 text-white"
                       : "border-line bg-white text-content-secondary",
@@ -356,7 +400,16 @@ function ExplorePage() {
 
         <button
           type="button"
-          className="flex size-9 items-center justify-center rounded-full border border-brand-100 bg-brand-50 text-brand-700 shadow-card transition enabled:active:scale-95 disabled:border-transparent disabled:bg-surface disabled:text-content-tertiary disabled:opacity-35 disabled:shadow-none max-[359px]:size-8"
+          className={[
+            "flex size-9 items-center justify-center rounded-full",
+            "border border-brand-100 bg-brand-50 text-brand-700",
+            "shadow-card transition",
+            "enabled:active:scale-95",
+            "disabled:border-transparent disabled:bg-surface",
+            "disabled:text-content-tertiary disabled:opacity-35",
+            "disabled:shadow-none",
+            "max-[359px]:size-8",
+          ].join(" ")}
           aria-label="다음 생활 분야"
           disabled={!canScrollCategoryRight}
           onClick={() =>
@@ -377,7 +430,8 @@ function ExplorePage() {
             <h2 className="text-[22px] font-extrabold tracking-[-0.04em] text-content">
               {selectedCategoryId === "all"
                 ? "전체 패치"
-                : selectedCategory?.label}
+                : selectedCategory?.label ??
+                  "전체 패치"}
             </h2>
           </div>
 
@@ -388,20 +442,22 @@ function ExplorePage() {
 
         {filteredPatches.length > 0 ? (
           <div className="mt-[17px] grid gap-[14px] pb-3">
-            {filteredPatches.map((patch) => (
-              <PatchListCard
-                key={patch.id}
-                patch={patch}
-                completed={completedPatchIdSet.has(
-                  patch.id,
-                )}
-                onClick={() =>
-                  navigate(
-                    `/patch/${patch.id}`,
-                  )
-                }
-              />
-            ))}
+            {filteredPatches.map(
+              (patch) => (
+                <PatchListCard
+                  key={patch.id}
+                  patch={patch}
+                  completed={completedPatchIdSet.has(
+                    patch.id,
+                  )}
+                  onClick={() =>
+                    navigate(
+                      `/patch/${patch.id}`,
+                    )
+                  }
+                />
+              ),
+            )}
           </div>
         ) : (
           <div className="mt-[17px] mb-3 flex shrink-0 flex-col items-center rounded-3xl bg-surface px-5 py-[46px] text-center">

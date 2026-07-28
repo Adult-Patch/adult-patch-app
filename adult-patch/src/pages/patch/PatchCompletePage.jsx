@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import {
   Navigate,
   useNavigate,
@@ -14,7 +12,7 @@ import AppLayout from "../../components/layout/AppLayout";
 import PatchBadge from "../../components/patch/PatchBadge";
 import { getPatchBadge } from "../../data/patchBadges";
 import { getPatchById } from "../../data/patches";
-import { getAppState } from "../../utils/appStorage";
+import { useAppState } from "../../hooks/useAppState";
 
 function formatCompletedDate(value) {
   if (!value) {
@@ -45,12 +43,10 @@ function PatchCompletePage() {
   const navigate = useNavigate();
   const { patchId } = useParams();
 
+  const { appState } = useAppState();
+
   const patch = getPatchById(patchId);
   const badge = getPatchBadge(patchId);
-
-  const [appState] = useState(() =>
-    getAppState(),
-  );
 
   if (!patch) {
     return (
@@ -109,16 +105,6 @@ function PatchCompletePage() {
       />
 
       <section className="relative mt-4 overflow-hidden rounded-[32px] border border-brand-100 bg-gradient-to-br from-brand-50 via-white to-brand-100/60 px-5 py-7 text-center shadow-card-strong">
-        <span
-          className="absolute -top-8 -left-8 size-28 rounded-full bg-brand-200/30 blur-2xl"
-          aria-hidden="true"
-        />
-
-        <span
-          className="absolute -right-8 -bottom-8 size-32 rounded-full bg-brand-300/25 blur-2xl"
-          aria-hidden="true"
-        />
-
         <div className="relative z-10 flex flex-col items-center">
           <PatchBadge
             badge={badge}

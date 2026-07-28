@@ -16,17 +16,8 @@ import PrimaryButton from "../../components/common/PrimaryButton";
 import ProgressBar from "../../components/common/ProgressBar";
 import AppLayout from "../../components/layout/AppLayout";
 import { getPatchById } from "../../data/patches";
-import {
-  getPatchReviewQuestion,
-} from "../../data/patchReviewQuestions";
-
-import {
-  completePatchReview,
-  getAppState,
-  savePatchProgress,
-  savePatchReviewSelection,
-  savePatchSelection,
-} from "../../utils/appStorage";
+import { getPatchReviewQuestion } from "../../data/patchReviewQuestions";
+import { useAppState } from "../../hooks/useAppState";
 
 const TOTAL_STEP_COUNT = 3;
 
@@ -53,26 +44,33 @@ function PatchPage() {
     setSearchParams,
   ] = useSearchParams();
 
+  const {
+    appState,
+    saving,
+    savePatchSelection,
+    savePatchReviewSelection,
+    savePatchProgress,
+    completePatchReview,
+  } = useAppState();
+
   const patch = getPatchById(patchId);
 
-  const [savedState] = useState(() =>
-    getAppState(),
+  const [
+    selectedChoiceId,
+    setSelectedChoiceId,
+  ] = useState(
+    () =>
+      appState.patchSelections[
+        patchId
+      ] ?? "",
   );
-
-  const [selectedChoiceId, setSelectedChoiceId] =
-    useState(
-      () =>
-        savedState.patchSelections[
-          patchId
-        ] ?? "",
-    );
 
   const [
     selectedReviewChoiceId,
     setSelectedReviewChoiceId,
   ] = useState(
     () =>
-      savedState.patchReviewSelections[
+      appState.patchReviewSelections[
         patchId
       ] ?? "",
   );
@@ -80,13 +78,17 @@ function PatchPage() {
   const [
     reviewSubmitted,
     setReviewSubmitted,
-  ] = useState(false);
+  ] = useState(() =>
+    appState.reviewCompletedPatchIds.includes(
+      patchId,
+    ),
+  );
 
   const requestedStep =
     searchParams.get("step");
 
   const savedStep =
-    savedState.patchProgress[patchId] ?? 1;
+    appState.patchProgress[patchId] ?? 1;
 
   const currentStep = requestedStep
     ? getSafeStep(requestedStep)
@@ -99,7 +101,8 @@ function PatchPage() {
     () =>
       patch?.choices.find(
         (choice) =>
-          choice.id === selectedChoiceId,
+          choice.id ===
+          selectedChoiceId,
       ) ?? null,
     [patch, selectedChoiceId],
   );
@@ -145,7 +148,12 @@ function PatchPage() {
   }, [currentStep]);
 
   if (!patch) {
-    return <Navigate to="/home" replace />;
+    return (
+      <Navigate
+        to="/home"
+        replace
+      />
+    );
   }
 
   if (
@@ -161,13 +169,21 @@ function PatchPage() {
   }
 
   if (!reviewQuestion) {
-    return <Navigate to="/explore" replace />;
+    return (
+      <Navigate
+        to="/explore"
+        replace
+      />
+    );
   }
 
-  const moveToStep = (nextStep) => {
-    const safeStep = getSafeStep(nextStep);
+  const moveToStep = async (
+    nextStep,
+  ) => {
+    const safeStep =
+      getSafeStep(nextStep);
 
-    savePatchProgress(
+    await savePatchProgress(
       patch.id,
       safeStep,
     );
@@ -177,48 +193,67 @@ function PatchPage() {
     });
   };
 
-  const handleBack = () => {
+  const handleBack = async () => {
     if (currentStep === 1) {
       navigate(-1);
       return;
     }
 
-    moveToStep(currentStep - 1);
-  };
-
-  const handleSituationSubmit = () => {
-    if (!selectedChoiceId) {
-      return;
-    }
-
-    savePatchSelection(
-      patch.id,
-      selectedChoiceId,
+    await moveToStep(
+      currentStep - 1,
     );
-
-    moveToStep(2);
   };
 
-  const handleLearningNext = () => {
-    moveToStep(3);
-  };
+  const handleSituationSubmit =
+    async () => {
+      if (
+        !selectedChoiceId ||
+        saving
+      ) {
+        return;
+      }
 
-  const handleReviewSubmit = () => {
-    if (!selectedReviewChoice) {
-      return;
-    }
+      await savePatchSelection(
+        patch.id,
+        selectedChoiceId,
+      );
 
-    savePatchReviewSelection(
-      patch.id,
-      selectedReviewChoice.id,
-    );
+      await moveToStep(2);
+    };
 
-    setReviewSubmitted(true);
+  const handleLearningNext =
+    async () => {
+      if (saving) {
+        return;
+      }
 
-    if (selectedReviewChoice.correct) {
-      completePatchReview(patch.id);
-    }
-  };
+      await moveToStep(3);
+    };
+
+  const handleReviewSubmit =
+    async () => {
+      if (
+        !selectedReviewChoice ||
+        saving
+      ) {
+        return;
+      }
+
+      await savePatchReviewSelection(
+        patch.id,
+        selectedReviewChoice.id,
+      );
+
+      if (
+        selectedReviewChoice.correct
+      ) {
+        await completePatchReview(
+          patch.id,
+        );
+      }
+
+      setReviewSubmitted(true);
+    };
 
   const handleReviewRetry = () => {
     setSelectedReviewChoiceId("");
@@ -237,8 +272,8 @@ function PatchPage() {
         </h1>
 
         <p className="mt-[14px] text-[15px] leading-[1.55] tracking-[-0.025em] text-content-secondary">
-          실제 생활에서 마주칠 수 있는 상황을
-          보고 먼저 판단해보세요.
+          실제 생활에서 마주칠 수 있는
+          상황을 보고 먼저 판단해보세요.
         </p>
       </header>
 
@@ -258,28 +293,41 @@ function PatchPage() {
         </h2>
 
         <div className="mt-8 grid gap-3">
-          {patch.choices.map((choice) => (
-            <ChoiceButton
-              key={choice.id}
-              selected={
-                selectedChoiceId === choice.id
-              }
-              onClick={() =>
-                setSelectedChoiceId(choice.id)
-              }
-            >
-              {choice.label}
-            </ChoiceButton>
-          ))}
+          {patch.choices.map(
+            (choice) => (
+              <ChoiceButton
+                key={choice.id}
+                selected={
+                  selectedChoiceId ===
+                  choice.id
+                }
+                disabled={saving}
+                onClick={() =>
+                  setSelectedChoiceId(
+                    choice.id,
+                  )
+                }
+              >
+                {choice.label}
+              </ChoiceButton>
+            ),
+          )}
         </div>
       </section>
 
       <div className="mt-auto pt-8">
         <PrimaryButton
-          disabled={!selectedChoiceId}
-          onClick={handleSituationSubmit}
+          disabled={
+            !selectedChoiceId ||
+            saving
+          }
+          onClick={
+            handleSituationSubmit
+          }
         >
-          선택 결과 확인하기
+          {saving
+            ? "저장 중..."
+            : "선택 결과 확인하기"}
         </PrimaryButton>
       </div>
     </>
@@ -310,13 +358,11 @@ function PatchPage() {
         <div className="flex items-start gap-[14px]">
           <span
             className={[
-              "flex size-10 flex-none items-center justify-center rounded-[14px]",
-              "text-lg font-extrabold",
+              "flex size-10 flex-none items-center justify-center rounded-[14px] text-lg font-extrabold text-white",
               selectedChoice.recommended
-                ? "bg-positive text-white"
-                : "bg-caution text-white",
+                ? "bg-positive"
+                : "bg-caution",
             ].join(" ")}
-            aria-hidden="true"
           >
             {selectedChoice.recommended
               ? "✓"
@@ -338,7 +384,9 @@ function PatchPage() {
             </span>
 
             <h2 className="mt-[5px] text-lg leading-[1.4] font-extrabold tracking-[-0.035em] text-content">
-              {selectedChoice.resultTitle}
+              {
+                selectedChoice.resultTitle
+              }
             </h2>
           </div>
         </div>
@@ -379,9 +427,12 @@ function PatchPage() {
 
       <div className="mt-auto pt-8">
         <PrimaryButton
+          disabled={saving}
           onClick={handleLearningNext}
         >
-          최종 확인 문제 풀기
+          {saving
+            ? "저장 중..."
+            : "최종 확인 문제 풀기"}
         </PrimaryButton>
       </div>
     </>
@@ -430,7 +481,10 @@ function PatchPage() {
                     selectedReviewChoiceId ===
                     choice.id
                   }
-                  disabled={reviewSubmitted}
+                  disabled={
+                    reviewSubmitted ||
+                    saving
+                  }
                   onClick={() =>
                     setSelectedReviewChoiceId(
                       choice.id,
@@ -457,8 +511,7 @@ function PatchPage() {
               <div className="flex items-center gap-3">
                 <span
                   className={[
-                    "flex size-9 items-center justify-center rounded-xl",
-                    "text-base font-extrabold text-white",
+                    "flex size-9 items-center justify-center rounded-xl text-base font-extrabold text-white",
                     isCorrect
                       ? "bg-positive"
                       : "bg-caution",
@@ -475,7 +528,9 @@ function PatchPage() {
               </div>
 
               <p className="mt-[14px] text-sm leading-[1.6] text-content-secondary">
-                {selectedReviewChoice.feedback}
+                {
+                  selectedReviewChoice.feedback
+                }
               </p>
             </section>
           )}
@@ -484,11 +539,14 @@ function PatchPage() {
           {!reviewSubmitted && (
             <PrimaryButton
               disabled={
-                !selectedReviewChoiceId
+                !selectedReviewChoiceId ||
+                saving
               }
               onClick={handleReviewSubmit}
             >
-              정답 확인하기
+              {saving
+                ? "저장 중..."
+                : "정답 확인하기"}
             </PrimaryButton>
           )}
 
@@ -523,6 +581,7 @@ function PatchPage() {
           type="button"
           className="flex size-[42px] items-center justify-center rounded-full bg-surface text-xl text-content"
           aria-label="이전 단계"
+          disabled={saving}
           onClick={handleBack}
         >
           ←

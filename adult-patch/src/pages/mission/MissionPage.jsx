@@ -12,35 +12,34 @@ import CharacterStage from "../../components/brand/CharacterStage";
 import PrimaryButton from "../../components/common/PrimaryButton";
 import AppLayout from "../../components/layout/AppLayout";
 import { getPatchById } from "../../data/patches";
-
-import {
-  completePatch,
-  getAppState,
-} from "../../utils/appStorage";
+import { useAppState } from "../../hooks/useAppState";
 
 function MissionPage() {
   const navigate = useNavigate();
   const { patchId } = useParams();
 
+  const {
+    appState,
+    saving,
+    completePatch,
+  } = useAppState();
+
   const patch = getPatchById(patchId);
 
-  const [appState] = useState(() =>
-    getAppState(),
-  );
-
   const [completed, setCompleted] =
-    useState(() => {
-      if (!patchId) {
-        return false;
-      }
-
-      return appState.completedMissionIds.includes(
+    useState(() =>
+      appState.completedMissionIds.includes(
         patchId,
-      );
-    });
+      ),
+    );
 
   if (!patch) {
-    return <Navigate to="/home" replace />;
+    return (
+      <Navigate
+        to="/home"
+        replace
+      />
+    );
   }
 
   const reviewCompleted =
@@ -62,12 +61,12 @@ function MissionPage() {
       patch.id,
     );
 
-  const handleComplete = () => {
-    if (!completed) {
+  const handleComplete = async () => {
+    if (!completed || saving) {
       return;
     }
 
-    completePatch(patch.id);
+    await completePatch(patch.id);
 
     navigate(
       `/patch/${patch.id}/complete`,
@@ -96,8 +95,8 @@ function MissionPage() {
         </h1>
 
         <p className="mt-3 text-sm leading-[1.55] text-content-secondary">
-          작은 행동 하나가 새로운 생활 능력이
-          됩니다.
+          작은 행동 하나가 새로운 생활
+          능력이 됩니다.
         </p>
       </header>
 
@@ -113,6 +112,7 @@ function MissionPage() {
 
       <button
         type="button"
+        disabled={saving}
         className={[
           "mt-4 flex w-full items-start gap-[14px] rounded-3xl border-[1.5px] p-5 text-left",
           "transition active:scale-[0.99]",
@@ -152,12 +152,14 @@ function MissionPage() {
 
       <div className="mt-auto pt-8">
         <PrimaryButton
-          disabled={!completed}
+          disabled={!completed || saving}
           onClick={handleComplete}
         >
-          {isAlreadyCompleted
-            ? "완료 패치 확인하기"
-            : "패치 완료하기"}
+          {saving
+            ? "저장 중..."
+            : isAlreadyCompleted
+              ? "완료 패치 확인하기"
+              : "패치 완료하기"}
         </PrimaryButton>
       </div>
     </AppLayout>

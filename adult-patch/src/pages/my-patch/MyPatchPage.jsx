@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router";
 
 import characterMain from "../../assets/images/characters/character-main.png";
@@ -12,7 +11,7 @@ import {
   getPatchById,
   patches,
 } from "../../data/patches";
-import { getAppState } from "../../utils/appStorage";
+import { useAppState } from "../../hooks/useAppState";
 
 function formatCompletedDate(value) {
   if (!value) {
@@ -42,9 +41,7 @@ function formatCompletedDate(value) {
 function MyPatchPage() {
   const navigate = useNavigate();
 
-  const [appState] = useState(() =>
-    getAppState(),
-  );
+  const { appState } = useAppState();
 
   const completedPatchItems =
     appState.completedPatchIds
@@ -96,8 +93,8 @@ function MyPatchPage() {
         </h1>
 
         <p className="mt-[14px] text-[15px] leading-[1.55] tracking-[-0.025em] text-content-secondary">
-          지금까지 배우고 실천한 생활 능력을
-          확인할 수 있어요.
+          지금까지 배우고 실천한 생활
+          능력을 확인할 수 있어요.
         </p>
       </header>
 
@@ -220,8 +217,8 @@ function MyPatchPage() {
 
           <p className="mt-[10px] mb-6 max-w-[290px] text-sm leading-[1.6] text-content-secondary">
             학습과 오늘의 미션을 완료하면
-            새로운 어른 능력 배지를 획득할 수
-            있어요.
+            새로운 어른 능력 배지를 획득할
+            수 있어요.
           </p>
 
           <PrimaryButton

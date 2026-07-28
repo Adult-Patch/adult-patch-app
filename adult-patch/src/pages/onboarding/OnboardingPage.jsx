@@ -13,17 +13,19 @@ import {
   SITUATION_OPTIONS,
 } from "../../data/onboardingOptions";
 
-import {
-  getAppState,
-  saveOnboarding,
-} from "../../utils/appStorage";
+import { useAppState } from "../../hooks/useAppState";
 
 const TOTAL_STEP_COUNT = 3;
 const MAX_INTEREST_COUNT = 2;
 
 function OnboardingPage() {
   const navigate = useNavigate();
-  const savedState = getAppState();
+
+  const {
+    appState,
+    saving,
+    saveOnboarding,
+  } = useAppState();
 
   const [currentStep, setCurrentStep] =
     useState(1);
@@ -31,17 +33,23 @@ function OnboardingPage() {
   const [
     selectedSituation,
     setSelectedSituation,
-  ] = useState(savedState.selectedSituation);
+  ] = useState(
+    appState.selectedSituation,
+  );
 
   const [
     selectedInterests,
     setSelectedInterests,
-  ] = useState(savedState.selectedInterests);
+  ] = useState(
+    appState.selectedInterests,
+  );
 
   const [
     experienceLevel,
     setExperienceLevel,
-  ] = useState(savedState.experienceLevel);
+  ] = useState(
+    appState.experienceLevel,
+  );
 
   const isCurrentStepComplete = (() => {
     if (currentStep === 1) {
@@ -59,7 +67,9 @@ function OnboardingPage() {
     setSelectedInterests(
       (previousInterests) => {
         const isSelected =
-          previousInterests.includes(interestId);
+          previousInterests.includes(
+            interestId,
+          );
 
         if (isSelected) {
           return previousInterests.filter(
@@ -89,24 +99,29 @@ function OnboardingPage() {
     }
 
     setCurrentStep(
-      (previousStep) => previousStep - 1,
+      (previousStep) =>
+        previousStep - 1,
     );
   };
 
-  const handleNext = () => {
-    if (!isCurrentStepComplete) {
+  const handleNext = async () => {
+    if (
+      !isCurrentStepComplete ||
+      saving
+    ) {
       return;
     }
 
     if (currentStep < TOTAL_STEP_COUNT) {
       setCurrentStep(
-        (previousStep) => previousStep + 1,
+        (previousStep) =>
+          previousStep + 1,
       );
 
       return;
     }
 
-    saveOnboarding({
+    await saveOnboarding({
       selectedSituation,
       selectedInterests,
       experienceLevel,
@@ -180,7 +195,8 @@ function OnboardingPage() {
       return (
         <>
           {renderHeader({
-            eyebrow: "어려운 생활 분야",
+            eyebrow:
+              "어려운 생활 분야",
             title: (
               <>
                 어떤 부분이
@@ -194,7 +210,8 @@ function OnboardingPage() {
 
           <div className="mt-6 flex justify-between rounded-xl bg-surface px-[14px] py-3 text-xs font-bold text-content-secondary">
             <span className="text-brand-600">
-              선택 {selectedInterests.length}
+              선택{" "}
+              {selectedInterests.length}
             </span>
 
             <span>
@@ -219,9 +236,13 @@ function OnboardingPage() {
                   <ChoiceButton
                     key={option.id}
                     selected={isSelected}
-                    disabled={isDisabled}
+                    disabled={
+                      isDisabled || saving
+                    }
                     onClick={() =>
-                      toggleInterest(option.id)
+                      toggleInterest(
+                        option.id,
+                      )
                     }
                   >
                     <span className="grid gap-[5px]">
@@ -230,7 +251,9 @@ function OnboardingPage() {
                       </strong>
 
                       <span className="text-xs leading-[1.45] font-medium text-content-secondary">
-                        {option.description}
+                        {
+                          option.description
+                        }
                       </span>
                     </span>
                   </ChoiceButton>
@@ -263,10 +286,14 @@ function OnboardingPage() {
               <ChoiceButton
                 key={option.id}
                 selected={
-                  experienceLevel === option.id
+                  experienceLevel ===
+                  option.id
                 }
+                disabled={saving}
                 onClick={() =>
-                  setExperienceLevel(option.id)
+                  setExperienceLevel(
+                    option.id,
+                  )
                 }
               >
                 {option.label}
@@ -307,12 +334,18 @@ function OnboardingPage() {
 
       <div className="mt-auto pt-8">
         <PrimaryButton
-          disabled={!isCurrentStepComplete}
+          disabled={
+            !isCurrentStepComplete ||
+            saving
+          }
           onClick={handleNext}
         >
-          {currentStep === TOTAL_STEP_COUNT
-            ? "맞춤 패치 확인하기"
-            : "다음"}
+          {saving
+            ? "저장 중..."
+            : currentStep ===
+                TOTAL_STEP_COUNT
+              ? "맞춤 패치 확인하기"
+              : "다음"}
         </PrimaryButton>
       </div>
     </AppLayout>

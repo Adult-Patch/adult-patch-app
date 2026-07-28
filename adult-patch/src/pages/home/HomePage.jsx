@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router";
 
 import characterMain from "../../assets/images/characters/character-main.png";
@@ -11,18 +11,13 @@ import {
   getSituationOption,
 } from "../../data/onboardingOptions";
 
-import {
-  getRecommendedPatches,
-} from "../../data/patches";
-
-import { getAppState } from "../../utils/appStorage";
+import { getRecommendedPatches } from "../../data/patches";
+import { useAppState } from "../../hooks/useAppState";
 
 function HomePage() {
   const navigate = useNavigate();
 
-  const [appState] = useState(() =>
-    getAppState(),
-  );
+  const { appState } = useAppState();
 
   const recommendedPatches = useMemo(
     () =>
@@ -86,7 +81,11 @@ function HomePage() {
           </span>
 
           <strong className="text-[22px] font-extrabold text-content">
-            {appState.completedPatchIds.length}개
+            {
+              appState
+                .completedPatchIds.length
+            }
+            개
           </strong>
         </div>
 
@@ -96,7 +95,11 @@ function HomePage() {
           </span>
 
           <strong className="text-[22px] font-extrabold text-content">
-            {appState.completedMissionIds.length}개
+            {
+              appState
+                .completedMissionIds.length
+            }
+            개
           </strong>
         </div>
       </section>
@@ -194,7 +197,9 @@ function HomePage() {
                   </p>
 
                   <p className="mt-[14px] rounded-xl bg-brand-50 px-[13px] py-3 text-xs leading-[1.5] font-semibold text-brand-800">
-                    {patch.recommendationReason}
+                    {
+                      patch.recommendationReason
+                    }
                   </p>
 
                   <div className="mt-[17px] flex items-center justify-between">

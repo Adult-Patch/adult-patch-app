@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import {
   Navigate,
@@ -14,18 +14,13 @@ import {
   getSituationOption,
 } from "../../data/onboardingOptions";
 
-import {
-  getRecommendedPatches,
-} from "../../data/patches";
-
-import { getAppState } from "../../utils/appStorage";
+import { getRecommendedPatches } from "../../data/patches";
+import { useAppState } from "../../hooks/useAppState";
 
 function OnboardingResultPage() {
   const navigate = useNavigate();
 
-  const [appState] = useState(() =>
-    getAppState(),
-  );
+  const { appState } = useAppState();
 
   const recommendedPatches = useMemo(
     () =>
@@ -169,7 +164,9 @@ function OnboardingResultPage() {
 
       <div className="mt-auto pt-8">
         <PrimaryButton
-          onClick={() => navigate("/home")}
+          onClick={() =>
+            navigate("/home")
+          }
         >
           홈에서 시작하기
         </PrimaryButton>
