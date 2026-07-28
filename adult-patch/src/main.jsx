@@ -1,10 +1,18 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 
-createRoot(document.getElementById('root')).render(
+import App from "./App";
+import "./styles/tokens.css";
+import "./styles/global.css";
+
+const rootElement = document.getElementById("root");
+
+if (!rootElement) {
+  throw new Error("root 요소를 찾을 수 없습니다.");
+}
+
+createRoot(rootElement).render(
   <StrictMode>
     <App />
   </StrictMode>,
-)
+);
