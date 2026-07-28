@@ -9,6 +9,7 @@ import HomePage from "../pages/home/HomePage";
 import MissionPage from "../pages/mission/MissionPage";
 import MyPatchPage from "../pages/my-patch/MyPatchPage";
 import OnboardingPage from "../pages/onboarding/OnboardingPage";
+import OnboardingResultPage from "../pages/onboarding/OnboardingResultPage";
 import PatchPage from "../pages/patch/PatchPage";
 import PatchResultPage from "../pages/patch/PatchResultPage";
 import SplashPage from "../pages/splash/SplashPage";
@@ -22,6 +23,11 @@ function AppRouter() {
         <Route
           path="/onboarding"
           element={<OnboardingPage />}
+        />
+
+        <Route
+          path="/onboarding/result"
+          element={<OnboardingResultPage />}
         />
 
         <Route path="/home" element={<HomePage />} />

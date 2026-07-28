@@ -1,28 +1,55 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 
 import characterMain from "../../assets/images/characters/character-main.png";
+
 import CharacterStage from "../../components/brand/CharacterStage";
-import PrimaryButton from "../../components/common/PrimaryButton";
 import AppLayout from "../../components/layout/AppLayout";
-import { patches } from "../../data/patches";
+
+import {
+  getInterestOption,
+  getSituationOption,
+} from "../../data/onboardingOptions";
+
+import {
+  getRecommendedPatches,
+} from "../../data/patches";
+
 import { getAppState } from "../../utils/appStorage";
 
 function HomePage() {
   const navigate = useNavigate();
 
-  const [appState] = useState(() => getAppState());
+  const [appState] = useState(() =>
+    getAppState(),
+  );
 
-  const recommendedPatch = patches[0];
-
-  const isRecommendedPatchCompleted =
-    appState.completedPatchIds.includes(recommendedPatch.id);
+  const recommendedPatches = useMemo(
+    () =>
+      getRecommendedPatches(
+        appState,
+        2,
+      ),
+    [appState],
+  );
 
   const completedPatchCount =
     appState.completedPatchIds.length;
 
   const completedMissionCount =
     appState.completedMissionIds.length;
+
+  const situationOption =
+    getSituationOption(
+      appState.selectedSituation,
+    );
+
+  const selectedInterestOptions =
+    appState.selectedInterests
+      .map((interestId) =>
+        getInterestOption(interestId),
+      )
+      .filter(Boolean);
 
   return (
     <AppLayout
@@ -61,12 +88,52 @@ function HomePage() {
       <section className="home-status">
         <div>
           <span>완료한 패치</span>
-          <strong>{completedPatchCount}개</strong>
+
+          <strong>
+            {completedPatchCount}개
+          </strong>
         </div>
 
         <div>
           <span>완료한 미션</span>
-          <strong>{completedMissionCount}개</strong>
+
+          <strong>
+            {completedMissionCount}개
+          </strong>
+        </div>
+      </section>
+
+      <section className="home-profile-summary">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">
+              나의 관심 분야
+            </p>
+
+            <h2>
+              {situationOption?.shortLabel ??
+                "생활 전반"}
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            onClick={() =>
+              navigate("/onboarding")
+            }
+          >
+            다시 설정
+          </button>
+        </div>
+
+        <div className="home-interest-list">
+          {selectedInterestOptions.map(
+            (option) => (
+              <span key={option.id}>
+                {option.label}
+              </span>
+            ),
+          )}
         </div>
       </section>
 
@@ -74,52 +141,81 @@ function HomePage() {
         <div className="section-heading">
           <div>
             <p className="eyebrow">
-              {isRecommendedPatchCompleted
-                ? "완료한 패치"
-                : "추천 패치"}
+              맞춤 추천
             </p>
 
-            <h2>첫 자취 기본편</h2>
+            <h2>지금 시작하기 좋은 패치</h2>
           </div>
 
-          <span className="category-badge">
-            {recommendedPatch.category}
+          <span className="recommendation-count">
+            2개
           </span>
         </div>
 
-        <article className="patch-card">
-          <div className="patch-card__visual patch-card__visual--character">
-            <CharacterStage
-              src={characterMain}
-              alt="정장을 입은 어른패치 캐릭터"
-              size="medium"
-            />
-          </div>
+        <div className="recommendation-list recommendation-list--home">
+          {recommendedPatches.map(
+            (patch, index) => {
+              const isCompleted =
+                appState.completedPatchIds.includes(
+                  patch.id,
+                );
 
-          <div className="patch-card__content">
-            <span className="patch-card__meta">
-              {isRecommendedPatchCompleted
-                ? "패치 완료"
-                : `약 ${recommendedPatch.estimatedMinutes}분`}
-            </span>
+              return (
+                <article
+                  key={patch.id}
+                  className="recommendation-card"
+                >
+                  <div className="recommendation-card__top">
+                    <span className="recommendation-card__number">
+                      {index + 1}
+                    </span>
 
-            <h3>{recommendedPatch.title}</h3>
+                    <span className="category-badge">
+                      {patch.category}
+                    </span>
+                  </div>
 
-            <p>{recommendedPatch.description}</p>
+                  <span className="recommendation-card__level">
+                    {isCompleted
+                      ? "완료한 패치"
+                      : patch.level}
+                  </span>
 
-            <PrimaryButton
-              onClick={() =>
-                navigate(
-                  `/patch/${recommendedPatch.id}`,
-                )
-              }
-            >
-              {isRecommendedPatchCompleted
-                ? "다시 학습하기"
-                : "패치 시작하기"}
-            </PrimaryButton>
-          </div>
-        </article>
+                  <h3>{patch.title}</h3>
+
+                  <p className="recommendation-card__description">
+                    {patch.description}
+                  </p>
+
+                  <p className="recommendation-card__reason">
+                    {patch.recommendationReason}
+                  </p>
+
+                  <div className="recommendation-card__footer">
+                    <span>
+                      {isCompleted
+                        ? "패치 완료"
+                        : `약 ${patch.estimatedMinutes}분`}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          `/patch/${patch.id}`,
+                        )
+                      }
+                    >
+                      {isCompleted
+                        ? "다시 보기"
+                        : "시작하기"}
+                    </button>
+                  </div>
+                </article>
+              );
+            },
+          )}
+        </div>
       </section>
     </AppLayout>
   );
