@@ -7,7 +7,10 @@ const DEFAULT_APP_STATE = {
   experienceLevel: "",
   completedPatchIds: [],
   completedMissionIds: [],
+  reviewCompletedPatchIds: [],
   patchSelections: {},
+  patchReviewSelections: {},
+  patchProgress: {},
 };
 
 function createDefaultAppState() {
@@ -16,7 +19,10 @@ function createDefaultAppState() {
     selectedInterests: [],
     completedPatchIds: [],
     completedMissionIds: [],
+    reviewCompletedPatchIds: [],
     patchSelections: {},
+    patchReviewSelections: {},
+    patchProgress: {},
   };
 }
 
@@ -40,7 +46,7 @@ function normalizeStringArray(value) {
   ];
 }
 
-function normalizePatchSelections(value) {
+function normalizeStringRecord(value) {
   if (
     !value ||
     typeof value !== "object" ||
@@ -50,20 +56,52 @@ function normalizePatchSelections(value) {
   }
 
   return Object.entries(value).reduce(
-    (selections, [patchId, choiceId]) => {
+    (record, [key, recordValue]) => {
+      const isValidKey =
+        typeof key === "string" &&
+        key.trim().length > 0;
+
+      const isValidValue =
+        typeof recordValue === "string" &&
+        recordValue.trim().length > 0;
+
+      if (isValidKey && isValidValue) {
+        record[key] = recordValue;
+      }
+
+      return record;
+    },
+    {},
+  );
+}
+
+function normalizeProgressRecord(value) {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value)
+  ) {
+    return {};
+  }
+
+  return Object.entries(value).reduce(
+    (record, [patchId, step]) => {
+      const numericStep = Number(step);
+
       const isValidPatchId =
         typeof patchId === "string" &&
         patchId.trim().length > 0;
 
-      const isValidChoiceId =
-        typeof choiceId === "string" &&
-        choiceId.trim().length > 0;
+      const isValidStep =
+        Number.isInteger(numericStep) &&
+        numericStep >= 1 &&
+        numericStep <= 3;
 
-      if (isValidPatchId && isValidChoiceId) {
-        selections[patchId] = choiceId;
+      if (isValidPatchId && isValidStep) {
+        record[patchId] = numericStep;
       }
 
-      return selections;
+      return record;
     },
     {},
   );
@@ -78,12 +116,27 @@ function normalizeAppState(value) {
     return createDefaultAppState();
   }
 
+  const completedPatchIds =
+    normalizeStringArray(
+      value.completedPatchIds,
+    );
+
+  const reviewCompletedPatchIds =
+    Array.isArray(
+      value.reviewCompletedPatchIds,
+    )
+      ? normalizeStringArray(
+          value.reviewCompletedPatchIds,
+        )
+      : [...completedPatchIds];
+
   return {
     onboardingCompleted:
       value.onboardingCompleted === true,
 
     selectedSituation:
-      typeof value.selectedSituation === "string"
+      typeof value.selectedSituation ===
+      "string"
         ? value.selectedSituation
         : "",
 
@@ -92,20 +145,31 @@ function normalizeAppState(value) {
     ),
 
     experienceLevel:
-      typeof value.experienceLevel === "string"
+      typeof value.experienceLevel ===
+      "string"
         ? value.experienceLevel
         : "",
 
-    completedPatchIds: normalizeStringArray(
-      value.completedPatchIds,
-    ),
+    completedPatchIds,
 
-    completedMissionIds: normalizeStringArray(
-      value.completedMissionIds,
-    ),
+    completedMissionIds:
+      normalizeStringArray(
+        value.completedMissionIds,
+      ),
 
-    patchSelections: normalizePatchSelections(
+    reviewCompletedPatchIds,
+
+    patchSelections: normalizeStringRecord(
       value.patchSelections,
+    ),
+
+    patchReviewSelections:
+      normalizeStringRecord(
+        value.patchReviewSelections,
+      ),
+
+    patchProgress: normalizeProgressRecord(
+      value.patchProgress,
     ),
   };
 }
@@ -177,57 +241,135 @@ export function saveOnboarding({
   selectedInterests,
   experienceLevel,
 }) {
-  return updateAppState((currentState) => ({
-    ...currentState,
-    onboardingCompleted: true,
-    selectedSituation,
-    selectedInterests,
-    experienceLevel,
-  }));
+  return updateAppState(
+    (currentState) => ({
+      ...currentState,
+      onboardingCompleted: true,
+      selectedSituation,
+      selectedInterests,
+      experienceLevel,
+    }),
+  );
 }
 
 export function savePatchSelection(
   patchId,
   choiceId,
 ) {
-  return updateAppState((currentState) => ({
-    ...currentState,
-    patchSelections: {
-      ...currentState.patchSelections,
-      [patchId]: choiceId,
-    },
-  }));
+  return updateAppState(
+    (currentState) => ({
+      ...currentState,
+      patchSelections: {
+        ...currentState.patchSelections,
+        [patchId]: choiceId,
+      },
+    }),
+  );
+}
+
+export function savePatchReviewSelection(
+  patchId,
+  choiceId,
+) {
+  return updateAppState(
+    (currentState) => ({
+      ...currentState,
+      patchReviewSelections: {
+        ...currentState.patchReviewSelections,
+        [patchId]: choiceId,
+      },
+    }),
+  );
+}
+
+export function savePatchProgress(
+  patchId,
+  step,
+) {
+  const safeStep = Math.min(
+    Math.max(Number(step), 1),
+    3,
+  );
+
+  return updateAppState(
+    (currentState) => ({
+      ...currentState,
+      patchProgress: {
+        ...currentState.patchProgress,
+        [patchId]: safeStep,
+      },
+    }),
+  );
+}
+
+export function completePatchReview(
+  patchId,
+) {
+  return updateAppState(
+    (currentState) => ({
+      ...currentState,
+
+      reviewCompletedPatchIds: [
+        ...new Set([
+          ...currentState.reviewCompletedPatchIds,
+          patchId,
+        ]),
+      ],
+
+      patchProgress: {
+        ...currentState.patchProgress,
+        [patchId]: 3,
+      },
+    }),
+  );
 }
 
 export function completePatch(patchId) {
-  return updateAppState((currentState) => ({
-    ...currentState,
+  return updateAppState(
+    (currentState) => ({
+      ...currentState,
 
-    completedPatchIds: [
-      ...new Set([
-        ...currentState.completedPatchIds,
-        patchId,
-      ]),
-    ],
+      completedPatchIds: [
+        ...new Set([
+          ...currentState.completedPatchIds,
+          patchId,
+        ]),
+      ],
 
-    completedMissionIds: [
-      ...new Set([
-        ...currentState.completedMissionIds,
-        patchId,
-      ]),
-    ],
-  }));
+      completedMissionIds: [
+        ...new Set([
+          ...currentState.completedMissionIds,
+          patchId,
+        ]),
+      ],
+
+      reviewCompletedPatchIds: [
+        ...new Set([
+          ...currentState.reviewCompletedPatchIds,
+          patchId,
+        ]),
+      ],
+
+      patchProgress: {
+        ...currentState.patchProgress,
+        [patchId]: 3,
+      },
+    }),
+  );
 }
 
 export function resetAppState() {
-  const defaultState = createDefaultAppState();
+  const defaultState =
+    createDefaultAppState();
 
   if (!isBrowserEnvironment()) {
     return defaultState;
   }
 
   try {
-    window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(
+      STORAGE_KEY,
+    );
   } catch (error) {
     console.error(
       "어른패치 저장 정보를 초기화하지 못했습니다.",
