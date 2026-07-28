@@ -8,6 +8,7 @@ import {
 import PrimaryButton from "../../components/common/PrimaryButton";
 import AppLayout from "../../components/layout/AppLayout";
 import { getPatchById } from "../../data/patches";
+import { getAppState } from "../../utils/appStorage";
 
 function PatchResultPage() {
   const navigate = useNavigate();
@@ -15,8 +16,14 @@ function PatchResultPage() {
   const { patchId } = useParams();
 
   const patch = getPatchById(patchId);
+
+  const savedChoiceId = patchId
+    ? getAppState().patchSelections[patchId]
+    : "";
+
   const selectedChoiceId =
-    location.state?.selectedChoiceId;
+    location.state?.selectedChoiceId ??
+    savedChoiceId;
 
   if (!patch) {
     return <Navigate to="/home" replace />;
@@ -32,7 +39,8 @@ function PatchResultPage() {
   }
 
   const selectedChoice = patch.choices.find(
-    (choice) => choice.id === selectedChoiceId,
+    (choice) =>
+      choice.id === selectedChoiceId,
   );
 
   if (!selectedChoice) {
@@ -57,7 +65,9 @@ function PatchResultPage() {
           .join(" ")}
         aria-hidden="true"
       >
-        {selectedChoice.recommended ? "✓" : "!"}
+        {selectedChoice.recommended
+          ? "✓"
+          : "!"}
       </div>
 
       <header className="result-header">
@@ -78,7 +88,10 @@ function PatchResultPage() {
         <ul>
           {patch.checklist.map((item) => (
             <li key={item}>
-              <span aria-hidden="true">✓</span>
+              <span aria-hidden="true">
+                ✓
+              </span>
+
               <p>{item}</p>
             </li>
           ))}

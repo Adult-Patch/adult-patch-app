@@ -4,6 +4,10 @@ import { useNavigate } from "react-router";
 import ChoiceButton from "../../components/common/ChoiceButton";
 import PrimaryButton from "../../components/common/PrimaryButton";
 import AppLayout from "../../components/layout/AppLayout";
+import {
+  getAppState,
+  saveOnboarding,
+} from "../../utils/appStorage";
 
 const situationOptions = [
   {
@@ -12,11 +16,13 @@ const situationOptions = [
   },
   {
     id: "first-job",
-    label: "취업이나 첫 직장을 준비하고 있어요.",
+    label:
+      "취업이나 첫 직장을 준비하고 있어요.",
   },
   {
     id: "general-life",
-    label: "생활 전반을 하나씩 배우고 싶어요.",
+    label:
+      "생활 전반을 하나씩 배우고 싶어요.",
   },
 ];
 
@@ -24,24 +30,25 @@ function OnboardingPage() {
   const navigate = useNavigate();
 
   const [selectedSituation, setSelectedSituation] =
-    useState("");
+    useState(
+      () => getAppState().selectedSituation,
+    );
 
   const handleNext = () => {
     if (!selectedSituation) {
       return;
     }
 
-    navigate("/home", {
-      state: {
-        situation: selectedSituation,
-      },
-    });
+    saveOnboarding(selectedSituation);
+    navigate("/home");
   };
 
   return (
     <AppLayout className="page">
       <header className="page-header">
-        <p className="eyebrow">나에게 필요한 패치</p>
+        <p className="eyebrow">
+          나에게 필요한 패치
+        </p>
 
         <h1>
           지금 어떤 생활을

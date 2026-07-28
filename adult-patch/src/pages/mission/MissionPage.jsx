@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import {
   Navigate,
   useNavigate,
@@ -8,6 +9,10 @@ import {
 import PrimaryButton from "../../components/common/PrimaryButton";
 import AppLayout from "../../components/layout/AppLayout";
 import { getPatchById } from "../../data/patches";
+import {
+  completePatch,
+  getAppState,
+} from "../../utils/appStorage";
 
 function MissionPage() {
   const navigate = useNavigate();
@@ -15,7 +20,17 @@ function MissionPage() {
 
   const patch = getPatchById(patchId);
 
-  const [completed, setCompleted] = useState(false);
+  const [completed, setCompleted] =
+    useState(() => {
+      if (!patchId) {
+        return false;
+      }
+
+      return getAppState()
+        .completedMissionIds.includes(
+          patchId,
+        );
+    });
 
   if (!patch) {
     return <Navigate to="/home" replace />;
@@ -26,11 +41,8 @@ function MissionPage() {
       return;
     }
 
-    navigate("/my-patch", {
-      state: {
-        completedPatchId: patch.id,
-      },
-    });
+    completePatch(patch.id);
+    navigate("/my-patch");
   };
 
   return (
@@ -44,9 +56,13 @@ function MissionPage() {
       </div>
 
       <header className="mission-page__header">
-        <p className="eyebrow">오늘의 어른미션</p>
+        <p className="eyebrow">
+          오늘의 어른미션
+        </p>
 
-        <h1>배운 내용을 직접 해볼까요?</h1>
+        <h1>
+          배운 내용을 직접 해볼까요?
+        </h1>
 
         <p>
           작은 행동 하나가 새로운 생활 능력이
@@ -66,7 +82,9 @@ function MissionPage() {
           .join(" ")}
         aria-pressed={completed}
         onClick={() =>
-          setCompleted((previous) => !previous)
+          setCompleted(
+            (previous) => !previous,
+          )
         }
       >
         <span className="mission-check__box">
@@ -75,6 +93,7 @@ function MissionPage() {
 
         <span className="mission-check__content">
           <strong>실천 미션</strong>
+
           <span>{patch.mission}</span>
         </span>
       </button>
@@ -84,7 +103,11 @@ function MissionPage() {
           disabled={!completed}
           onClick={handleComplete}
         >
-          패치 완료하기
+          {getAppState().completedPatchIds.includes(
+            patch.id,
+          )
+            ? "완료 상태 저장하기"
+            : "패치 완료하기"}
         </PrimaryButton>
       </div>
     </AppLayout>

@@ -1,13 +1,30 @@
+import { useState } from "react";
 import { useNavigate } from "react-router";
 
 import PrimaryButton from "../../components/common/PrimaryButton";
 import AppLayout from "../../components/layout/AppLayout";
 import { patches } from "../../data/patches";
+import { getAppState } from "../../utils/appStorage";
 
 function HomePage() {
   const navigate = useNavigate();
 
+  const [appState] = useState(() =>
+    getAppState(),
+  );
+
   const recommendedPatch = patches[0];
+
+  const isRecommendedPatchCompleted =
+    appState.completedPatchIds.includes(
+      recommendedPatch.id,
+    );
+
+  const completedPatchCount =
+    appState.completedPatchIds.length;
+
+  const completedMissionCount =
+    appState.completedMissionIds.length;
 
   return (
     <AppLayout
@@ -37,20 +54,29 @@ function HomePage() {
 
       <section className="home-status">
         <div>
-          <span>이번 주 업데이트</span>
-          <strong>0개</strong>
+          <span>완료한 패치</span>
+          <strong>
+            {completedPatchCount}개
+          </strong>
         </div>
 
         <div>
           <span>완료한 미션</span>
-          <strong>0개</strong>
+          <strong>
+            {completedMissionCount}개
+          </strong>
         </div>
       </section>
 
       <section className="recommended-section">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">추천 패치</p>
+            <p className="eyebrow">
+              {isRecommendedPatchCompleted
+                ? "완료한 패치"
+                : "추천 패치"}
+            </p>
+
             <h2>첫 자취 기본편</h2>
           </div>
 
@@ -70,7 +96,9 @@ function HomePage() {
 
           <div className="patch-card__content">
             <span className="patch-card__meta">
-              약 {recommendedPatch.estimatedMinutes}분
+              {isRecommendedPatchCompleted
+                ? "패치 완료"
+                : `약 ${recommendedPatch.estimatedMinutes}분`}
             </span>
 
             <h3>{recommendedPatch.title}</h3>
@@ -84,7 +112,9 @@ function HomePage() {
                 )
               }
             >
-              패치 시작하기
+              {isRecommendedPatchCompleted
+                ? "다시 학습하기"
+                : "패치 시작하기"}
             </PrimaryButton>
           </div>
         </article>

@@ -1,4 +1,8 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import {
   Navigate,
   useNavigate,
@@ -10,6 +14,10 @@ import PrimaryButton from "../../components/common/PrimaryButton";
 import ProgressBar from "../../components/common/ProgressBar";
 import AppLayout from "../../components/layout/AppLayout";
 import { getPatchById } from "../../data/patches";
+import {
+  getAppState,
+  savePatchSelection,
+} from "../../utils/appStorage";
 
 function PatchPage() {
   const navigate = useNavigate();
@@ -17,8 +25,24 @@ function PatchPage() {
 
   const patch = getPatchById(patchId);
 
-  const [selectedChoiceId, setSelectedChoiceId] =
-    useState("");
+  const [
+    selectedChoiceId,
+    setSelectedChoiceId,
+  ] = useState("");
+
+  useEffect(() => {
+    if (!patchId) {
+      setSelectedChoiceId("");
+      return;
+    }
+
+    const savedChoiceId =
+      getAppState().patchSelections[patchId];
+
+    setSelectedChoiceId(
+      savedChoiceId ?? "",
+    );
+  }, [patchId]);
 
   if (!patch) {
     return <Navigate to="/home" replace />;
@@ -28,6 +52,11 @@ function PatchPage() {
     if (!selectedChoiceId) {
       return;
     }
+
+    savePatchSelection(
+      patch.id,
+      selectedChoiceId,
+    );
 
     navigate(`/patch/${patch.id}/result`, {
       state: {
@@ -59,7 +88,9 @@ function PatchPage() {
       />
 
       <header className="page-header patch-page__header">
-        <p className="eyebrow">{patch.category}</p>
+        <p className="eyebrow">
+          {patch.category}
+        </p>
 
         <h1>{patch.title}</h1>
       </header>
