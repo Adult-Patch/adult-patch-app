@@ -1,11 +1,11 @@
 import { useState } from "react";
-
 import {
   Navigate,
   useNavigate,
   useParams,
 } from "react-router";
 
+import CharacterStage from "../../components/brand/CharacterStage";
 import PrimaryButton from "../../components/common/PrimaryButton";
 import AppLayout from "../../components/layout/AppLayout";
 import { getPatchById } from "../../data/patches";
@@ -36,6 +36,11 @@ function MissionPage() {
     return <Navigate to="/home" replace />;
   }
 
+  const isAlreadyCompleted =
+    getAppState().completedPatchIds.includes(
+      patch.id,
+    );
+
   const handleComplete = () => {
     if (!completed) {
       return;
@@ -47,13 +52,10 @@ function MissionPage() {
 
   return (
     <AppLayout className="page mission-page">
-      <div className="mission-page__visual">
-        <span className="mission-page__visual-head" />
-
-        <span className="mission-page__visual-body">
-          <span className="mission-page__visual-tie" />
-        </span>
-      </div>
+      <CharacterStage
+        size="medium"
+        className="mission-page__character"
+      />
 
       <header className="mission-page__header">
         <p className="eyebrow">
@@ -103,9 +105,7 @@ function MissionPage() {
           disabled={!completed}
           onClick={handleComplete}
         >
-          {getAppState().completedPatchIds.includes(
-            patch.id,
-          )
+          {isAlreadyCompleted
             ? "완료 상태 저장하기"
             : "패치 완료하기"}
         </PrimaryButton>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
+import CharacterStage from "../../components/brand/CharacterStage";
 import PrimaryButton from "../../components/common/PrimaryButton";
 import AppLayout from "../../components/layout/AppLayout";
 import { getPatchById } from "../../data/patches";
@@ -63,10 +64,8 @@ function MyPatchPage() {
           ))}
         </section>
       ) : (
-        <section className="empty-state">
-          <div className="empty-state__symbol">
-            <span />
-          </div>
+        <section className="empty-state empty-state--character">
+          <CharacterStage size="small" />
 
           <h2>
             아직 완료한 패치가 없어요.
