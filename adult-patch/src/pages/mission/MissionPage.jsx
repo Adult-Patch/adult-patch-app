@@ -24,24 +24,41 @@ function MissionPage() {
 
   const patch = getPatchById(patchId);
 
+  const [appState] = useState(() =>
+    getAppState(),
+  );
+
   const [completed, setCompleted] =
     useState(() => {
       if (!patchId) {
         return false;
       }
 
-      return getAppState()
-        .completedMissionIds.includes(
-          patchId,
-        );
+      return appState.completedMissionIds.includes(
+        patchId,
+      );
     });
 
   if (!patch) {
     return <Navigate to="/home" replace />;
   }
 
+  const reviewCompleted =
+    appState.reviewCompletedPatchIds.includes(
+      patch.id,
+    );
+
+  if (!reviewCompleted) {
+    return (
+      <Navigate
+        to={`/patch/${patch.id}?step=3`}
+        replace
+      />
+    );
+  }
+
   const isAlreadyCompleted =
-    getAppState().completedPatchIds.includes(
+    appState.completedPatchIds.includes(
       patch.id,
     );
 
@@ -78,10 +95,20 @@ function MissionPage() {
         </p>
       </header>
 
+      <section className="mt-8 rounded-3xl border border-brand-100 bg-brand-50 p-5">
+        <span className="text-xs font-bold text-brand-600">
+          이번 패치에서 배운 내용
+        </span>
+
+        <h2 className="mt-[7px] text-[17px] leading-[1.45] font-extrabold tracking-[-0.03em] text-content">
+          {patch.title}
+        </h2>
+      </section>
+
       <button
         type="button"
         className={[
-          "mt-8 flex w-full items-start gap-[14px] rounded-3xl border-[1.5px] p-5 text-left",
+          "mt-4 flex w-full items-start gap-[14px] rounded-3xl border-[1.5px] p-5 text-left",
           "transition active:scale-[0.99]",
           completed
             ? "border-brand-500 bg-brand-50"
