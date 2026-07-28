@@ -7,6 +7,8 @@ import "./styles/tokens.css";
 import "./styles/global.css";
 import "./styles/brand.css";
 import "./styles/recommendation.css";
+import "./styles/explore.css";
+import "./styles/layout-fix.css";
 
 const rootElement = document.getElementById("root");
 

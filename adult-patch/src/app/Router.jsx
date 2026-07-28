@@ -5,6 +5,7 @@ import {
   Routes,
 } from "react-router";
 
+import ExplorePage from "../pages/explore/ExplorePage";
 import HomePage from "../pages/home/HomePage";
 import MissionPage from "../pages/mission/MissionPage";
 import MyPatchPage from "../pages/my-patch/MyPatchPage";
@@ -31,6 +32,11 @@ function AppRouter() {
         />
 
         <Route path="/home" element={<HomePage />} />
+
+        <Route
+          path="/explore"
+          element={<ExplorePage />}
+        />
 
         <Route
           path="/patch/:patchId"

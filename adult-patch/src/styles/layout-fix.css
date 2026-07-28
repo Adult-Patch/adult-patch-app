@@ -1,0 +1,174 @@
+/*
+ * 어른패치 공통 모바일 레이아웃
+ *
+ * 콘텐츠 영역과 하단 내비게이션을 분리한다.
+ * 콘텐츠만 세로 스크롤되고 하단 메뉴는 화면 아래에 유지된다.
+ */
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+}
+
+html,
+body {
+  overflow: hidden;
+}
+
+.app-shell {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.app-device {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--mobile-max-width);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--color-background);
+}
+
+/*
+ * 각 페이지가 들어가는 실제 스크롤 영역
+ */
+.app-content {
+  flex: 1 1 auto;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app-content::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * 하단 메뉴가 콘텐츠 위에 겹치지 않으므로
+ * 내비게이션 높이만큼 큰 여백은 필요하지 않다.
+ */
+.app-content--with-navigation {
+  padding-bottom: 28px;
+}
+
+/*
+ * absolute 배치 제거
+ * app-device의 마지막 flex 요소로 고정한다.
+ */
+.bottom-navigation {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  z-index: 10;
+
+  flex: 0 0 auto;
+  width: 100%;
+  height:
+    calc(
+      var(--bottom-navigation-height) +
+        env(safe-area-inset-bottom)
+    );
+
+  padding:
+    9px 20px
+    env(safe-area-inset-bottom);
+
+  background: rgb(255 255 255 / 96%);
+  border-top: 1px solid var(--color-border);
+  backdrop-filter: blur(18px);
+}
+
+/*
+ * 기존 페이지별 내비게이션 높이 계산을 제거한다.
+ * 마지막 카드 아래에는 일반적인 화면 여백만 남긴다.
+ */
+.home-page,
+.explore-page,
+.my-patch-page {
+  padding-bottom: 36px;
+}
+
+/*
+ * 목록 및 카드가 flex 레이아웃 안에서
+ * 높이 때문에 축소되지 않도록 처리한다.
+ */
+.recommendation-list,
+.patch-list,
+.explore-result {
+  flex-shrink: 0;
+  min-height: 0;
+  overflow: visible;
+}
+
+.recommendation-card,
+.patch-list-card,
+.patch-card {
+  flex-shrink: 0;
+}
+
+/*
+ * 탐색 결과 마지막 카드 아래에 여유 공간을 보장한다.
+ */
+.patch-list {
+  padding-bottom: 12px;
+}
+
+/*
+ * 검색 결과가 없는 경우에도 화면 내부에서
+ * 자연스럽게 스크롤되도록 한다.
+ */
+.explore-empty {
+  flex-shrink: 0;
+  margin-bottom: 12px;
+}
+
+/*
+ * 모바일 브라우저에서 입력창 포커스 시
+ * 페이지 너비가 흔들리는 현상을 방지한다.
+ */
+.explore-search,
+.explore-search input {
+  max-width: 100%;
+}
+
+/*
+ * 가로 카테고리 필터가 세로 스크롤을 방해하지 않도록 한다.
+ */
+.category-filter {
+  flex-shrink: 0;
+  touch-action: pan-x;
+}
+
+/*
+ * 세로 목록에서는 세로 터치 스크롤을 명확하게 허용한다.
+ */
+.explore-page,
+.home-page,
+.my-patch-page {
+  touch-action: pan-y;
+}
+
+@media (min-width: 481px) {
+  .app-device {
+    box-shadow:
+      0 0 40px rgb(26 42 70 / 12%);
+  }
+}
