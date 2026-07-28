@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
+import characterMain from "../../assets/images/characters/character-main.png";
+import CharacterStage from "../../components/brand/CharacterStage";
 import PrimaryButton from "../../components/common/PrimaryButton";
 import AppLayout from "../../components/layout/AppLayout";
 import { patches } from "../../data/patches";
@@ -9,16 +11,12 @@ import { getAppState } from "../../utils/appStorage";
 function HomePage() {
   const navigate = useNavigate();
 
-  const [appState] = useState(() =>
-    getAppState(),
-  );
+  const [appState] = useState(() => getAppState());
 
   const recommendedPatch = patches[0];
 
   const isRecommendedPatchCompleted =
-    appState.completedPatchIds.includes(
-      recommendedPatch.id,
-    );
+    appState.completedPatchIds.includes(recommendedPatch.id);
 
   const completedPatchCount =
     appState.completedPatchIds.length;
@@ -52,19 +50,23 @@ function HomePage() {
         </div>
       </header>
 
+      <CharacterStage
+        src={characterMain}
+        alt="정장을 입은 어른패치 캐릭터"
+        size="small"
+        className="home-page__character"
+        message="처음이라 모르는 건 당연해요."
+      />
+
       <section className="home-status">
         <div>
           <span>완료한 패치</span>
-          <strong>
-            {completedPatchCount}개
-          </strong>
+          <strong>{completedPatchCount}개</strong>
         </div>
 
         <div>
           <span>완료한 미션</span>
-          <strong>
-            {completedMissionCount}개
-          </strong>
+          <strong>{completedMissionCount}개</strong>
         </div>
       </section>
 
@@ -86,12 +88,12 @@ function HomePage() {
         </div>
 
         <article className="patch-card">
-          <div className="patch-card__visual">
-            <span className="patch-card__visual-circle" />
-
-            <span className="patch-card__visual-shirt">
-              <span className="patch-card__visual-tie" />
-            </span>
+          <div className="patch-card__visual patch-card__visual--character">
+            <CharacterStage
+              src={characterMain}
+              alt="정장을 입은 어른패치 캐릭터"
+              size="medium"
+            />
           </div>
 
           <div className="patch-card__content">

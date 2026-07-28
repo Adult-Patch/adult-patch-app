@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
+import BrandLogo from "../../components/brand/BrandLogo";
 import ChoiceButton from "../../components/common/ChoiceButton";
 import PrimaryButton from "../../components/common/PrimaryButton";
 import AppLayout from "../../components/layout/AppLayout";
@@ -44,7 +45,12 @@ function OnboardingPage() {
   };
 
   return (
-    <AppLayout className="page">
+    <AppLayout className="page onboarding-page">
+      <BrandLogo
+        size="small"
+        className="onboarding-page__logo"
+      />
+
       <header className="page-header">
         <p className="eyebrow">
           나에게 필요한 패치
