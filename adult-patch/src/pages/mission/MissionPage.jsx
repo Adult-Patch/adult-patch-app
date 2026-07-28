@@ -68,7 +68,13 @@ function MissionPage() {
     }
 
     completePatch(patch.id);
-    navigate("/my-patch");
+
+    navigate(
+      `/patch/${patch.id}/complete`,
+      {
+        replace: true,
+      },
+    );
   };
 
   return (
@@ -150,7 +156,7 @@ function MissionPage() {
           onClick={handleComplete}
         >
           {isAlreadyCompleted
-            ? "완료 상태 저장하기"
+            ? "완료 패치 확인하기"
             : "패치 완료하기"}
         </PrimaryButton>
       </div>

@@ -11,6 +11,7 @@ import MissionPage from "../pages/mission/MissionPage";
 import MyPatchPage from "../pages/my-patch/MyPatchPage";
 import OnboardingPage from "../pages/onboarding/OnboardingPage";
 import OnboardingResultPage from "../pages/onboarding/OnboardingResultPage";
+import PatchCompletePage from "../pages/patch/PatchCompletePage";
 import PatchPage from "../pages/patch/PatchPage";
 import PatchResultPage from "../pages/patch/PatchResultPage";
 import SplashPage from "../pages/splash/SplashPage";
@@ -19,7 +20,10 @@ function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<SplashPage />} />
+        <Route
+          path="/"
+          element={<SplashPage />}
+        />
 
         <Route
           path="/onboarding"
@@ -31,7 +35,10 @@ function AppRouter() {
           element={<OnboardingResultPage />}
         />
 
-        <Route path="/home" element={<HomePage />} />
+        <Route
+          path="/home"
+          element={<HomePage />}
+        />
 
         <Route
           path="/explore"
@@ -54,13 +61,20 @@ function AppRouter() {
         />
 
         <Route
+          path="/patch/:patchId/complete"
+          element={<PatchCompletePage />}
+        />
+
+        <Route
           path="/my-patch"
           element={<MyPatchPage />}
         />
 
         <Route
           path="*"
-          element={<Navigate to="/" replace />}
+          element={
+            <Navigate to="/" replace />
+          }
         />
       </Routes>
     </BrowserRouter>
